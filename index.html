@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUNV — Fixed-Supply Token on Robinhood Chain</title>
+  <meta name="description" content="SUNV is a fixed-supply ERC-20 token on Robinhood Chain with verified source code and live SUNV/USDG liquidity on Uniswap v4." />
+  <meta name="theme-color" content="#080704" />
+  <meta property="og:title" content="SUNV" />
+  <meta property="og:description" content="A fixed-supply digital asset built for a developing onchain ecosystem." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/sunv-hero.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "SUNV",
+    "description": "SUNV is a fixed-supply ERC-20 token on Robinhood Chain.",
+    "inLanguage": "en"
+  }
+  </script>
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="site-header" id="top">
+    <a class="brand" href="#top" aria-label="SUNV home">
+      <img src="assets/sunv-icon.png" alt="SUNV orbital sun emblem" />
+      <span>SUNV</span>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="#about">About</a>
+      <a href="#tokenomics">Tokenomics</a>
+      <a href="#network">Network</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#transparency">Transparency</a>
+    </nav>
+    <a class="button button-small" href="https://app.uniswap.org/swap?chain=robinhood&inputCurrency=0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168&outputCurrency=0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Trade on Uniswap</a>
+  </header>
+
+  <main>
+    <section class="hero section">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="status-dot"></span> Live on Robinhood Chain mainnet</div>
+        <h1>Powering the emerging <span>SUN ecosystem.</span></h1>
+        <p class="hero-lead">SUNV is a fixed-supply ERC-20 token built for a developing onchain ecosystem. The smart contract is source-verified, the supply is fixed at 100 million tokens, and SUNV/USDG liquidity is live on Uniswap v4.</p>
+        <div class="hero-actions">
+          <a class="button" href="https://app.uniswap.org/swap?chain=robinhood&inputCurrency=0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168&outputCurrency=0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Open SUNV / USDG</a>
+          <a class="button button-secondary" href="https://robinhoodchain.blockscout.com/address/0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">View verified contract</a>
+        </div>
+        <div class="contract-card" aria-label="SUNV contract address">
+          <div>
+            <span class="contract-label">Official contract</span>
+            <code id="contractAddress">0x22fd16577ba869A7df77F4280ae08c65BB03111d</code>
+          </div>
+          <button class="copy-button" data-copy="0x22fd16577ba869A7df77F4280ae08c65BB03111d" aria-label="Copy SUNV contract address">Copy</button>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img src="assets/sunv-icon.png" alt="" />
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="SUNV key facts">
+      <div><strong>100,000,000</strong><span>Fixed supply</span></div>
+      <div><strong>18</strong><span>Decimals</span></div>
+      <div><strong>4663</strong><span>Chain ID</span></div>
+      <div><strong>v4 · 0.25%</strong><span>Uniswap pool</span></div>
+    </section>
+
+    <section class="section two-column" id="about">
+      <div>
+        <div class="section-kicker">01 · About</div>
+        <h2>A simple token foundation with transparent onchain rules.</h2>
+      </div>
+      <div class="body-copy">
+        <p>SUNV was deployed as a fixed-supply ERC-20. The verified contract exposes standard ERC-20 transfer and approval functionality and does not expose a public mint function that can increase the original supply.</p>
+        <p>The project is in its launch-stage development phase. Future ecosystem features, integrations and use cases will be published as they are built and verified rather than presented as completed before they exist.</p>
+      </div>
+    </section>
+
+    <section class="section" id="tokenomics">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">02 · Tokenomics</div>
+          <h2>100 million SUNV. Fixed at deployment.</h2>
+        </div>
+        <p>Target allocation framework. Wallet-level allocation addresses and vesting details should be published as each allocation is implemented.</p>
+      </div>
+      <div class="tokenomics-grid">
+        <article class="allocation allocation-50"><span>50%</span><h3>Treasury & reserve</h3><p>50,000,000 SUNV</p></article>
+        <article class="allocation allocation-20"><span>20%</span><h3>Liquidity reserve</h3><p>20,000,000 SUNV</p></article>
+        <article class="allocation allocation-15"><span>15%</span><h3>Ecosystem & rewards</h3><p>15,000,000 SUNV</p></article>
+        <article class="allocation allocation-10"><span>10%</span><h3>Founder / team</h3><p>10,000,000 SUNV</p></article>
+        <article class="allocation allocation-5"><span>5%</span><h3>Partnerships & community</h3><p>5,000,000 SUNV</p></article>
+      </div>
+      <div class="allocation-bar" aria-label="Token allocation proportions">
+        <span class="seg seg-50" title="Treasury & reserve 50%"></span>
+        <span class="seg seg-20" title="Liquidity reserve 20%"></span>
+        <span class="seg seg-15" title="Ecosystem & rewards 15%"></span>
+        <span class="seg seg-10" title="Founder/team 10%"></span>
+        <span class="seg seg-5" title="Partnerships/community 5%"></span>
+      </div>
+    </section>
+
+    <section class="section network" id="network">
+      <div class="network-panel">
+        <div class="section-kicker">03 · Contract & network</div>
+        <h2>Built on Robinhood Chain.</h2>
+        <p>Robinhood Chain is an Ethereum-compatible Layer 2. SUNV uses the chain's native ETH gas token and is deployed on mainnet.</p>
+        <dl class="specs">
+          <div><dt>Token</dt><dd>Sun (SUNV)</dd></div>
+          <div><dt>Standard</dt><dd>ERC-20</dd></div>
+          <div><dt>Network</dt><dd>Robinhood Chain</dd></div>
+          <div><dt>Chain ID</dt><dd>4663</dd></div>
+          <div><dt>Supply</dt><dd>100,000,000 SUNV</dd></div>
+          <div><dt>Decimals</dt><dd>18</dd></div>
+        </dl>
+      </div>
+      <div class="verification-card">
+        <img src="assets/sunv-icon.png" alt="SUNV emblem" />
+        <div class="verified-badge">✓ Source verified</div>
+        <h3>Exact-match contract verification</h3>
+        <p>The deployed source is verified on Robinhood Chain Blockscout. Always verify the contract address before interacting with SUNV.</p>
+        <a class="text-link" href="https://robinhoodchain.blockscout.com/address/0x22fd16577ba869A7df77F4280ae08c65BB03111d?tab=contract" target="_blank" rel="noopener noreferrer">Inspect contract ↗</a>
+      </div>
+    </section>
+
+    <section class="section liquidity-section" id="liquidity">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">04 · Liquidity</div>
+          <h2>SUNV / USDG is live on Uniswap v4.</h2>
+        </div>
+        <p>The initial pool was created as a technical launch position. Public liquidity can be expanded deliberately as treasury security, disclosures and launch infrastructure are completed.</p>
+      </div>
+      <div class="liquidity-card">
+        <div class="pair-icons">
+          <img src="assets/sunv-icon.png" alt="SUNV" />
+          <div class="usdg-mark">$</div>
+        </div>
+        <div>
+          <span class="small-label">Trading pair</span>
+          <h3>SUNV / USDG</h3>
+          <p>Uniswap v4 · 0.25% fee tier</p>
+        </div>
+        <a class="button" href="https://app.uniswap.org/swap?chain=robinhood&inputCurrency=0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168&outputCurrency=0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Trade</a>
+      </div>
+      <p class="risk-note"><strong>Market notice:</strong> SUNV is a newly launched token. Liquidity can be shallow, prices can move sharply, and digital assets involve significant risk. No return, price target or profit is guaranteed.</p>
+    </section>
+
+    <section class="section" id="roadmap">
+      <div class="section-kicker">05 · Roadmap</div>
+      <h2>Build first. Publish what is real.</h2>
+      <div class="roadmap-grid">
+        <article class="roadmap-step done"><span>01</span><div><h3>Contract launch</h3><p>Mainnet deployment, source verification and transfer testing.</p></div></article>
+        <article class="roadmap-step done"><span>02</span><div><h3>Market infrastructure</h3><p>SUNV/USDG pool creation and two-way swap verification.</p></div></article>
+        <article class="roadmap-step active"><span>03</span><div><h3>Public identity</h3><p>Website, project metadata, social presence and public disclosures.</p></div></article>
+        <article class="roadmap-step"><span>04</span><div><h3>Treasury security</h3><p>Allocation wallets, custody controls, vesting and transparent reserves.</p></div></article>
+        <article class="roadmap-step"><span>05</span><div><h3>Ecosystem development</h3><p>Build and verify practical SUN ecosystem functionality and integrations.</p></div></article>
+      </div>
+    </section>
+
+    <section class="section transparency" id="transparency">
+      <div>
+        <div class="section-kicker">06 · Transparency</div>
+        <h2>Verify. Don't trust a ticker alone.</h2>
+        <p>New tokens can share names or symbols. The contract address is the canonical identifier for SUNV. Security warnings from wallets or exchanges should not be disabled; verify the address and network before every interaction.</p>
+      </div>
+      <div class="address-box">
+        <span>Canonical SUNV contract</span>
+        <code>0x22fd16577ba869A7df77F4280ae08c65BB03111d</code>
+        <button class="copy-button wide" data-copy="0x22fd16577ba869A7df77F4280ae08c65BB03111d">Copy address</button>
+      </div>
+    </section>
+
+    <section class="section final-cta">
+      <img src="assets/sunv-wordmark.png" alt="SUNV logo" />
+      <div>
+        <h2>Follow SUNV by contract, not by hype.</h2>
+        <p>Official links and social channels will be added here as they are established.</p>
+      </div>
+      <div class="final-actions">
+        <a class="button" href="https://robinhoodchain.blockscout.com/address/0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Blockscout</a>
+        <a class="button button-secondary" href="https://app.uniswap.org/swap?chain=robinhood&outputCurrency=0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Uniswap</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand"><img src="assets/sunv-icon.png" alt="" /><span>SUNV</span></div>
+    <p>SUNV is an independent token project and is not endorsed by Robinhood Markets, Inc. or Uniswap Labs.</p>
+    <p class="footer-small">Digital assets are volatile and can lose value. This site is informational and does not promise returns or financial performance.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Contract copied</div>
+  <script src="app.js"></script>
+</body>
+</html>
