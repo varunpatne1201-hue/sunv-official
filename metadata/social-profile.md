@@ -1,16 +1,30 @@
 # SUNV official social profile copy
 
 ## Display name
-SUNV
+SUNV Official
+
+## Handle
+@SUNVOfficial
+
+## Website
+https://sunvcoin.com
+
+## Official contact
+contact@sunvcoin.com
 
 ## Short bio
-Fixed-supply ERC-20 on Robinhood Chain. Verified contract. SUNV/USDG liquidity live on Uniswap v4. Building the SUN ecosystem onchain.
+Official account for SUNV — a fixed-supply ERC-20 token on Robinhood Chain. Verify the contract at sunvcoin.com.
 
 ## Contract verification post
-Official SUNV contract on Robinhood Chain:
+SUNV is live on Robinhood Chain.
+
+Official contract:
 
 `0x22fd16577ba869A7df77F4280ae08c65BB03111d`
 
-Network: Robinhood Chain mainnet (Chain ID 4663)
+Official website: https://sunvcoin.com
 
-Always verify the contract address before interacting with SUNV. This account is the official project channel.
+Always verify the contract address before interacting.
+
+## Official X profile
+https://x.com/SUNVOfficial
