@@ -16,13 +16,15 @@ A static, deployment-ready public website and metadata package for SUNV.
 ## Local preview
 Open `index.html` directly in a browser, or run a static server from this folder.
 
-## Before public deployment
-1. Buy/connect the final domain.
-2. Create the official project email and social account.
-3. Replace `TO_BE_SET_AFTER_DOMAIN_IS_CONNECTED` in `metadata/token-metadata.json`.
-4. Add final social links to the site.
-5. Confirm the target token allocation is the allocation you intend to publish.
-6. Do not imply endorsement by Robinhood or Uniswap.
+## Public identity
+- Website: https://sunvcoin.com
+- Official X: https://x.com/SUNVOfficial
+- Official contact: contact@sunvcoin.com
+
+## Launch checklist
+1. Confirm the target token allocation is the allocation you intend to publish.
+2. Keep official contract and social links synchronized across listings.
+3. Do not imply endorsement by Robinhood or Uniswap.
 
 ## Render deployment
 Create a new **Static Site** in Render, connect the GitHub repository containing this folder, leave the build command empty, and publish from the repository root (or this folder if it is the repo root).
