@@ -7,13 +7,19 @@
 **Contract:** `0x22fd16577ba869A7df77F4280ae08c65BB03111d`  
 **Decimals:** 18  
 **Total supply:** 100,000,000 SUNV  
-**Logo:** `assets/sunv-icon-512.png`  
+**Logo URL:** https://sunvcoin.com/assets/sunv-icon-512.png  
 
 ## Short description
 SUNV is a fixed-supply ERC-20 token on Robinhood Chain, designed as the foundation for a developing onchain ecosystem. The contract source is verified on Blockscout and SUNV/USDG liquidity is live on Uniswap v4.
 
 ## Website
-Add the final production URL after the website domain is connected.
+https://sunvcoin.com
+
+## Official X
+https://x.com/SUNVOfficial
+
+## Official contact
+contact@sunvcoin.com
 
 ## Explorer
 https://robinhoodchain.blockscout.com/address/0x22fd16577ba869A7df77F4280ae08c65BB03111d
