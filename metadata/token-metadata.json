@@ -11,6 +11,8 @@
   "description": "SUNV is a fixed-supply ERC-20 token on Robinhood Chain, designed as the foundation for a developing onchain ecosystem.",
   "explorer": "https://robinhoodchain.blockscout.com/address/0x22fd16577ba869A7df77F4280ae08c65BB03111d",
   "uniswap": "https://app.uniswap.org/swap?chain=robinhood&outputCurrency=0x22fd16577ba869A7df77F4280ae08c65BB03111d",
-  "website": "TO_BE_SET_AFTER_DOMAIN_IS_CONNECTED",
-  "logo": "assets/sunv-icon-512.png"
+  "website": "https://sunvcoin.com",
+  "x": "https://x.com/SUNVOfficial",
+  "email": "contact@sunvcoin.com",
+  "logo": "https://sunvcoin.com/assets/sunv-icon-512.png"
 }
