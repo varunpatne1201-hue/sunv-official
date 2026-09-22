@@ -23,7 +23,7 @@
     "name": "SUNV",
     "description": "SUNV is a fixed-supply ERC-20 token on Robinhood Chain.",
     "url": "https://sunvcoin.com/",
-    "sameAs": ["https://x.com/SUNVOfficial"],
+    "sameAs": ["https://x.com/SUNVOfficial", "https://t.me/SUNVOfficialCommunity"],
     "inLanguage": "en"
   }
   </script>
@@ -95,23 +95,18 @@
       <div class="section-heading">
         <div>
           <div class="section-kicker">02 · Tokenomics</div>
-          <h2>100 million SUNV. Fixed at deployment.</h2>
+          <h2>Current onchain distribution, not projected allocations.</h2>
         </div>
-        <p>Target allocation framework. Wallet-level allocation addresses and vesting details should be published as each allocation is implemented.</p>
+        <p>Snapshot as of September 22, 2026. Almost all fixed supply remains in the project-controlled deployer reserve. Live wallet and AMM balances can change after this snapshot.</p>
       </div>
-      <div class="tokenomics-grid">
-        <article class="allocation allocation-50"><span>50%</span><h3>Treasury & reserve</h3><p>50,000,000 SUNV</p></article>
-        <article class="allocation allocation-20"><span>20%</span><h3>Liquidity reserve</h3><p>20,000,000 SUNV</p></article>
-        <article class="allocation allocation-15"><span>15%</span><h3>Ecosystem & rewards</h3><p>15,000,000 SUNV</p></article>
-        <article class="allocation allocation-10"><span>10%</span><h3>Founder / team</h3><p>10,000,000 SUNV</p></article>
-        <article class="allocation allocation-5"><span>5%</span><h3>Partnerships & community</h3><p>5,000,000 SUNV</p></article>
+      <div class="tokenomics-grid" style="grid-template-columns:repeat(3,1fr);">
+        <article class="allocation"><span>99,939,999</span><h3>Project reserve / deployer</h3><p>SUNV remaining in the original deployer wallet after launch transfers.</p></article>
+        <article class="allocation"><span>60,000</span><h3>Liquidity operations</h3><p>SUNV transferred to the dedicated liquidity wallet for launch liquidity and market operations.</p></article>
+        <article class="allocation"><span>1</span><h3>Treasury validation</h3><p>1 SUNV transferred to validate the treasury address during launch setup.</p></article>
       </div>
-      <div class="allocation-bar" aria-label="Token allocation proportions">
-        <span class="seg seg-50" title="Treasury & reserve 50%"></span>
-        <span class="seg seg-20" title="Liquidity reserve 20%"></span>
-        <span class="seg seg-15" title="Ecosystem & rewards 15%"></span>
-        <span class="seg seg-10" title="Founder/team 10%"></span>
-        <span class="seg seg-5" title="Partnerships/community 5%"></span>
+      <p class="risk-note"><strong>Circulating supply:</strong> SUNV does not currently publish a finalized circulating-supply figure. Total supply should not be treated as freely circulating supply while most tokens remain in the project-controlled reserve.</p>
+      <div class="hero-actions">
+        <a class="button button-secondary" href="/transparency.html">Full supply & treasury transparency</a>
       </div>
     </section>
 
@@ -144,7 +139,7 @@
           <div class="section-kicker">04 · Liquidity</div>
           <h2>SUNV / USDG is live on Uniswap v4.</h2>
         </div>
-        <p>The initial pool was created as a technical launch position. Public liquidity can be expanded deliberately as treasury security, disclosures and launch infrastructure are completed.</p>
+        <p>The initial pool was created as a technical launch position and has since been expanded. Public liquidity can change as swaps occur and as liquidity is added or removed.</p>
       </div>
       <div class="liquidity-card">
         <div class="pair-icons">
@@ -191,8 +186,8 @@
       <div class="roadmap-grid">
         <article class="roadmap-step done"><span>01</span><div><h3>Contract launch</h3><p>Mainnet deployment, source verification and transfer testing.</p></div></article>
         <article class="roadmap-step done"><span>02</span><div><h3>Market infrastructure</h3><p>SUNV/USDG pool creation and two-way swap verification.</p></div></article>
-        <article class="roadmap-step active"><span>03</span><div><h3>Public identity</h3><p>Website, project metadata, social presence and public disclosures.</p></div></article>
-        <article class="roadmap-step"><span>04</span><div><h3>Treasury security</h3><p>Allocation wallets, custody controls, vesting and transparent reserves.</p></div></article>
+        <article class="roadmap-step active"><span>03</span><div><h3>Public identity & transparency</h3><p>Website, verified links, community channels and current onchain supply disclosures.</p></div></article>
+        <article class="roadmap-step"><span>04</span><div><h3>Treasury security</h3><p>Define custody controls, reserve policy and any future vesting or locking mechanisms before presenting them as implemented.</p></div></article>
         <article class="roadmap-step"><span>05</span><div><h3>Ecosystem development</h3><p>Build and verify practical SUN ecosystem functionality and integrations.</p></div></article>
       </div>
     </section>
@@ -201,7 +196,11 @@
       <div>
         <div class="section-kicker">07 · Transparency</div>
         <h2>Verify. Don't trust a ticker alone.</h2>
-        <p>New tokens can share names or symbols. The contract address is the canonical identifier for SUNV. Security warnings from wallets or exchanges should not be disabled; verify the address and network before every interaction.</p>
+        <p>New tokens can share names or symbols. The contract address is the canonical identifier for SUNV. Current project-controlled wallets, reserve concentration, liquidity status and limitations are published on the transparency page.</p>
+        <div class="hero-actions">
+          <a class="button button-secondary" href="/transparency.html">Supply & treasury report</a>
+          <a class="button button-secondary" href="https://t.me/SUNVOfficialCommunity" target="_blank" rel="noopener noreferrer">Telegram community</a>
+        </div>
       </div>
       <div class="address-box">
         <span>Canonical SUNV contract</span>
@@ -214,13 +213,14 @@
       <img src="assets/sunv-wordmark.png" alt="SUNV logo" />
       <div>
         <h2>Follow SUNV by contract, not by hype.</h2>
-        <p>Use only the official SUNV website, social account and verified contract links below.</p>
+        <p>Use only the official SUNV website, social accounts and verified contract links below.</p>
       </div>
       <div class="final-actions">
         <a class="button" href="https://robinhoodchain.blockscout.com/address/0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Blockscout</a>
         <a class="button button-secondary" href="https://app.uniswap.org/swap?chain=robinhood&outputCurrency=0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Uniswap</a>
         <a class="button button-secondary" href="https://www.geckoterminal.com/robinhood/pools/0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04" target="_blank" rel="noopener noreferrer">Live Chart · GeckoTerminal</a>
         <a class="button button-secondary" href="https://x.com/SUNVOfficial" target="_blank" rel="noopener noreferrer">X / @SUNVOfficial</a>
+        <a class="button button-secondary" href="https://t.me/SUNVOfficialCommunity" target="_blank" rel="noopener noreferrer">Telegram</a>
         <a class="button button-secondary" href="mailto:contact@sunvcoin.com">Email</a>
       </div>
     </section>
@@ -229,7 +229,7 @@
   <footer>
     <div class="footer-brand"><img src="assets/sunv-icon.png" alt="" /><span>SUNV</span></div>
     <p>SUNV is an independent token project and is not endorsed by Robinhood Markets, Inc. or Uniswap Labs.</p>
-    <p class="footer-small">Official contact: <a href="mailto:contact@sunvcoin.com">contact@sunvcoin.com</a> · <a href="https://x.com/SUNVOfficial" target="_blank" rel="noopener noreferrer">@SUNVOfficial</a></p>
+    <p class="footer-small">Official contact: <a href="mailto:contact@sunvcoin.com">contact@sunvcoin.com</a> · <a href="https://x.com/SUNVOfficial" target="_blank" rel="noopener noreferrer">@SUNVOfficial</a> · <a href="https://t.me/SUNVOfficialCommunity" target="_blank" rel="noopener noreferrer">Telegram</a></p>
     <p class="footer-small">Digital assets are volatile and can lose value. This site is informational and does not promise returns or financial performance.</p>
   </footer>
 
