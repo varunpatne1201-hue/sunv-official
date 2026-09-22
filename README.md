@@ -1,30 +1,39 @@
-# SUNV Website v1
+# SUNV Website
 
-A static, deployment-ready public website and metadata package for SUNV.
+Official static website and public metadata package for SUNV.
 
-## Official token facts used
+## Official token facts
 - Name: Sun
 - Symbol: SUNV
 - Network: Robinhood Chain mainnet
 - Chain ID: 4663
 - Contract: `0x22fd16577ba869A7df77F4280ae08c65BB03111d`
-- Supply: 100,000,000 SUNV
+- Total supply: 100,000,000 SUNV
 - Decimals: 18
 - Source: verified on Robinhood Chain Blockscout
 - DEX pair: SUNV / USDG on Uniswap v4
 
-## Local preview
-Open `index.html` directly in a browser, or run a static server from this folder.
+## Public documents
+- Website: https://sunvcoin.com
+- Litepaper v0.1: https://sunvcoin.com/litepaper.html
+- Supply & treasury transparency: https://sunvcoin.com/transparency.html
+- Source litepaper: `metadata/litepaper.md`
 
 ## Public identity
-- Website: https://sunvcoin.com
 - Official X: https://x.com/SUNVOfficial
+- Telegram: https://t.me/SUNVOfficialCommunity
 - Official contact: contact@sunvcoin.com
 
-## Launch checklist
-1. Confirm the target token allocation is the allocation you intend to publish.
-2. Keep official contract and social links synchronized across listings.
-3. Do not imply endorsement by Robinhood or Uniswap.
+## Current disclosure policy
+The website distinguishes implemented onchain facts from planned or exploratory features. Project-controlled reserves, liquidity status and current limitations are disclosed publicly. Future allocations, vesting, locking, governance, integrations or utility should be described as implemented only after they exist and can be verified.
 
-## Render deployment
-Create a new **Static Site** in Render, connect the GitHub repository containing this folder, leave the build command empty, and publish from the repository root (or this folder if it is the repo root).
+## Development direction
+1. Maintain canonical contract and project information.
+2. Complete public metadata and explorer reviews.
+3. Publish reserve, liquidity and treasury disclosures.
+4. Build a public SUNV transparency dashboard.
+5. Prototype practical SUN ecosystem utility.
+6. Evaluate stronger custody, reserve controls and decentralization mechanisms as the project matures.
+
+## Deployment
+The site is deployed as a Render Static Site from the repository. Commits to `main` trigger automatic deployment.
