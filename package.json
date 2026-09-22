@@ -1,0 +1,13 @@
+{
+  "name": "sunv-data-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public read-only data proxy for the SUNV transparency dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
