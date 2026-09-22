@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUNV — Supply & Treasury Transparency</title>
+  <meta name="description" content="Current onchain supply, reserve and liquidity transparency for SUNV on Robinhood Chain." />
+  <meta name="theme-color" content="#080704" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="site-header" id="top">
+    <a class="brand" href="/" aria-label="SUNV home">
+      <img src="assets/sunv-icon.png" alt="SUNV orbital sun emblem" />
+      <span>SUNV</span>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="/#about">About</a>
+      <a href="/#tokenomics">Tokenomics</a>
+      <a href="/#liquidity">Liquidity</a>
+      <a href="/#roadmap">Roadmap</a>
+      <a href="/#transparency">Transparency</a>
+    </nav>
+    <a class="button button-small" href="/" aria-label="Return to SUNV home">SUNV Home</a>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="section-kicker">SUNV · Onchain transparency</div>
+      <h1 style="font-size:clamp(3rem,6vw,6rem);max-width:900px;">Supply & treasury <span>transparency.</span></h1>
+      <p class="hero-lead">This page describes the current onchain distribution of the fixed 100,000,000 SUNV supply and the project's launch-stage liquidity position. It separates implemented facts from future plans.</p>
+      <p class="risk-note"><strong>Snapshot date:</strong> September 22, 2026. Wallet and AMM balances can change after this snapshot. Use Blockscout, Uniswap and GeckoTerminal for current onchain data.</p>
+    </section>
+
+    <section class="section" style="padding-top:20px;">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">01 · Current supply</div>
+          <h2>100 million SUNV. No additional minting.</h2>
+        </div>
+        <p>The verified ERC-20 contract was deployed with a fixed total supply of 100,000,000 SUNV. The verified contract does not expose a public mint function that can increase that original supply.</p>
+      </div>
+
+      <div class="tokenomics-grid" style="grid-template-columns:repeat(3,1fr);">
+        <article class="allocation">
+          <span>99,939,999</span>
+          <h3>Project reserve / deployer</h3>
+          <p>SUNV remaining in the original deployer wallet after launch transfers.</p>
+        </article>
+        <article class="allocation">
+          <span>60,000</span>
+          <h3>Liquidity operations</h3>
+          <p>SUNV transferred from the deployer to the dedicated liquidity wallet. Pool and wallet balances vary as liquidity is added and swaps occur.</p>
+        </article>
+        <article class="allocation">
+          <span>1</span>
+          <h3>Treasury validation transfer</h3>
+          <p>A 1 SUNV transfer was used to validate the treasury address during launch setup.</p>
+        </article>
+      </div>
+
+      <p class="risk-note"><strong>Circulating supply:</strong> SUNV does not currently publish a finalized circulating-supply figure. Most of the fixed supply remains in the project-controlled deployer reserve, so total supply should not be treated as freely circulating supply.</p>
+    </section>
+
+    <section class="section network" style="padding-top:20px;">
+      <div class="network-panel">
+        <div class="section-kicker">02 · Project-controlled wallets</div>
+        <h2>Wallets are visible onchain.</h2>
+        <dl class="specs">
+          <div><dt>Deployer / project reserve</dt><dd>0xE33e2DC38b2cFD57d54D8a4727CC681249f9792F</dd></div>
+          <div><dt>Liquidity operations</dt><dd>0x5ef599593E1735Af5a25121b5C04176d30604f8f</dd></div>
+          <div><dt>SUNV contract</dt><dd>0x22fd16577ba869A7df77F4280ae08c65BB03111d</dd></div>
+          <div><dt>Network</dt><dd>Robinhood Chain · Chain ID 4663</dd></div>
+        </dl>
+        <div class="hero-actions">
+          <a class="button button-secondary" href="https://robinhoodchain.blockscout.com/address/0xE33e2DC38b2cFD57d54D8a4727CC681249f9792F" target="_blank" rel="noopener noreferrer">Reserve wallet ↗</a>
+          <a class="button button-secondary" href="https://robinhoodchain.blockscout.com/address/0x5ef599593E1735Af5a25121b5C04176d30604f8f" target="_blank" rel="noopener noreferrer">Liquidity wallet ↗</a>
+        </div>
+      </div>
+
+      <div class="verification-card">
+        <img src="assets/sunv-icon.png" alt="SUNV emblem" />
+        <div class="verified-badge">✓ Source verified</div>
+        <h3>Canonical contract</h3>
+        <p>Always identify SUNV by contract address, not ticker alone. Contract ownership and token-info verification are handled through Robinhood Chain Blockscout.</p>
+        <a class="text-link" href="https://robinhoodchain.blockscout.com/token/0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">View SUNV on Blockscout ↗</a>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:20px;">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">03 · Liquidity</div>
+          <h2>Launch-stage liquidity is deliberately small.</h2>
+        </div>
+        <p>SUNV/USDG trades through a Uniswap v4 position on Robinhood Chain. Live balances can change continuously with swaps.</p>
+      </div>
+      <div class="liquidity-card">
+        <div class="pair-icons">
+          <img src="assets/sunv-icon.png" alt="SUNV" />
+          <div class="usdg-mark">$</div>
+        </div>
+        <div>
+          <span class="small-label">Latest project snapshot</span>
+          <h3>SUNV / USDG · Uniswap v4</h3>
+          <p>Approximately $119.16 of liquidity after the September 21 liquidity increase. Live market data may differ.</p>
+        </div>
+        <div class="hero-actions">
+          <a class="button button-secondary" href="https://www.geckoterminal.com/robinhood/pools/0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04" target="_blank" rel="noopener noreferrer">Live market data</a>
+        </div>
+      </div>
+      <p class="risk-note"><strong>Important:</strong> The current liquidity position is not represented as locked liquidity. The LP owner retains control of the position. Any future locking, vesting or custody change should be treated as implemented only after it is verifiable onchain.</p>
+    </section>
+
+    <section class="section two-column" style="padding-top:20px;">
+      <div>
+        <div class="section-kicker">04 · Reserve status</div>
+        <h2>What is implemented today.</h2>
+      </div>
+      <div class="body-copy">
+        <p><strong>Project reserve:</strong> approximately 99.94% of the fixed supply remains in the original deployer-controlled reserve wallet.</p>
+        <p><strong>Vesting:</strong> no formal onchain vesting schedule has been implemented for the project reserve as of this snapshot.</p>
+        <p><strong>Liquidity lock:</strong> the Uniswap v4 liquidity position is not currently presented as locked.</p>
+        <p><strong>Future allocation:</strong> allocation targets discussed during project planning are not shown here as completed allocations. Future distributions will be described as implemented only after the corresponding onchain transfers or contracts exist.</p>
+      </div>
+    </section>
+
+    <section class="section transparency" style="padding-top:20px;" id="verify">
+      <div>
+        <div class="section-kicker">05 · Verify independently</div>
+        <h2>Use onchain sources.</h2>
+        <p>SUNV market capitalization shown by wallets or charting sites is a price-derived estimate, not cash held by the project or liquidity available for redemptions. With shallow liquidity, displayed valuation can move sharply from small trades.</p>
+        <div class="hero-actions">
+          <a class="button" href="https://robinhoodchain.blockscout.com/token/0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer">Blockscout</a>
+          <a class="button button-secondary" href="https://www.geckoterminal.com/robinhood/pools/0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04" target="_blank" rel="noopener noreferrer">GeckoTerminal</a>
+          <a class="button button-secondary" href="https://t.me/SUNVOfficialCommunity" target="_blank" rel="noopener noreferrer">Telegram</a>
+          <a class="button button-secondary" href="https://x.com/SUNVOfficial" target="_blank" rel="noopener noreferrer">X</a>
+        </div>
+      </div>
+      <div class="address-box">
+        <span>Canonical SUNV contract</span>
+        <code>0x22fd16577ba869A7df77F4280ae08c65BB03111d</code>
+        <button class="copy-button wide" data-copy="0x22fd16577ba869A7df77F4280ae08c65BB03111d">Copy address</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand"><img src="assets/sunv-icon.png" alt="" /><span>SUNV</span></div>
+    <p>SUNV is an independent token project and is not endorsed by Robinhood Markets, Inc. or Uniswap Labs.</p>
+    <p class="footer-small">Official contact: <a href="mailto:contact@sunvcoin.com">contact@sunvcoin.com</a> · <a href="https://x.com/SUNVOfficial" target="_blank" rel="noopener noreferrer">@SUNVOfficial</a> · <a href="https://t.me/SUNVOfficialCommunity" target="_blank" rel="noopener noreferrer">Telegram</a></p>
+    <p class="footer-small">Digital assets are volatile and can lose value. This site is informational and does not promise returns or financial performance.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Contract copied</div>
+  <script src="app.js"></script>
+</body>
+</html>
