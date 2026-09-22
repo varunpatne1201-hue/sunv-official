@@ -166,3 +166,156 @@ footer { width:min(1180px,calc(100% - 36px));margin:0 auto;padding:0 0 50px;colo
   .final-cta { padding:26px; }
   .final-cta img { width:100%; max-width:220px; }
 }
+
+
+/* Transparency dashboard */
+.dashboard-hero {
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:42px;
+  align-items:end;
+  padding-bottom:72px;
+}
+.dashboard-contract { align-self:end; }
+.dashboard-status {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-top:26px;
+  color:var(--muted);
+  font-size:.86rem;
+}
+.dashboard-status strong { color:#ffd36d; }
+.dashboard-status .copy-button:disabled { opacity:.55; cursor:wait; }
+.dashboard-section { padding-top:56px; padding-bottom:56px; }
+.metrics-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.metric-card {
+  min-height:150px;
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:linear-gradient(155deg,rgba(255,186,52,.065),rgba(255,255,255,.018));
+}
+.metric-label {
+  display:block;
+  color:var(--muted);
+  font-size:.72rem;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  margin-bottom:10px;
+}
+.metric-value {
+  display:block;
+  color:#fff2c3;
+  font-size:clamp(1.65rem,3vw,2.55rem);
+  line-height:1.05;
+  letter-spacing:-.035em;
+  margin-bottom:12px;
+}
+.metric-value-small { font-size:clamp(1.35rem,2.4vw,2rem); }
+.metric-card small { color:#8f877c; }
+.metric-positive { color:#95f0a8; }
+.metric-negative { color:#ff8b78; }
+.activity-bar {
+  height:14px;
+  display:flex;
+  overflow:hidden;
+  border-radius:99px;
+  background:#17120a;
+  margin-top:24px;
+  border:1px solid rgba(255,255,255,.04);
+}
+.activity-buy { background:#71d991; transition:width .35s ease; }
+.activity-sell { background:#e06c5f; transition:width .35s ease; }
+.activity-legend {
+  display:flex;
+  gap:26px;
+  margin-top:12px;
+  color:var(--muted);
+  font-size:.86rem;
+}
+.activity-legend strong { color:var(--text); }
+.legend-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+.buy-dot { background:#71d991; }
+.sell-dot { background:#e06c5f; }
+.holder-panel {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:30px;
+  padding:32px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+}
+.holder-count {
+  display:block;
+  font-size:clamp(3rem,7vw,6rem);
+  line-height:1;
+  letter-spacing:-.06em;
+  color:#ffd36d;
+  margin:8px 0 12px;
+}
+.holder-note { margin:0; color:var(--muted); }
+.concentration-card {
+  margin-top:18px;
+  padding:26px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:rgba(255,255,255,.02);
+}
+.concentration-card strong {
+  display:block;
+  font-size:2.4rem;
+  color:#ffd36d;
+  margin:4px 0 8px;
+}
+.concentration-card p { color:var(--muted); margin-bottom:18px; }
+.reserve-meter {
+  height:14px;
+  border-radius:99px;
+  overflow:hidden;
+  background:#19140c;
+  border:1px solid rgba(255,255,255,.04);
+}
+.reserve-meter span {
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,#ffbd36,#ed7410);
+}
+.source-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.source-card {
+  min-height:112px;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.02);
+  transition:transform .2s,border-color .2s,background .2s;
+}
+.source-card:hover {
+  transform:translateY(-2px);
+  border-color:rgba(255,194,66,.38);
+  background:rgba(255,190,50,.045);
+}
+.source-card strong { display:block; color:#ffd36d; font-size:1.05rem; margin-bottom:8px; }
+.source-card span { color:var(--muted); font-size:.86rem; }
+.status-dot.status-warning { background:#f0aa37; box-shadow:0 0 12px rgba(240,170,55,.7); }
+
+@media (max-width: 960px) {
+  .dashboard-hero { grid-template-columns:1fr; }
+  .metrics-grid,.source-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width: 640px) {
+  .metrics-grid,.source-grid { grid-template-columns:1fr; }
+  .holder-panel { align-items:flex-start; flex-direction:column; }
+  .activity-legend { justify-content:space-between; }
+}
