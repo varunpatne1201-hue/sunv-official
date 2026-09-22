@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUNV Transparency Dashboard</title>
+  <meta name="description" content="Live SUNV market and onchain transparency dashboard for Robinhood Chain." />
+  <meta name="theme-color" content="#080704" />
+  <meta property="og:title" content="SUNV Transparency Dashboard" />
+  <meta property="og:description" content="Live market data, holder count, reserve disclosures and canonical SUNV links." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sunvcoin.com/dashboard.html" />
+  <meta property="og:image" content="assets/sunv-hero.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@SUNVOfficial" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="site-header" id="top">
+    <a class="brand" href="/" aria-label="SUNV home">
+      <img src="assets/sunv-icon.png" alt="SUNV orbital sun emblem" />
+      <span>SUNV</span>
+    </a>
+    <nav class="nav" aria-label="Dashboard navigation">
+      <a href="#market">Market</a>
+      <a href="#activity">Activity</a>
+      <a href="#holders">Holders</a>
+      <a href="#reserves">Reserves</a>
+      <a href="#sources">Sources</a>
+    </nav>
+    <a class="button button-small" href="/litepaper.html">Litepaper</a>
+  </header>
+
+  <main>
+    <section class="section dashboard-hero">
+      <div>
+        <div class="eyebrow"><span class="status-dot" id="liveDot"></span> Public transparency dashboard</div>
+        <h1 style="font-size:clamp(3.2rem,6vw,6rem);max-width:920px;">SUNV data, <span>in one place.</span></h1>
+        <p class="hero-lead">Live market information is fetched from DEX Screener. Holder count is requested from Robinhood Chain Blockscout. Project-reserve figures are clearly labeled snapshot disclosures rather than live circulation claims.</p>
+        <div class="dashboard-status">
+          <span id="refreshState">Loading live data…</span>
+          <span>·</span>
+          <span>Last refresh: <strong id="lastUpdated">—</strong></span>
+          <button class="copy-button" id="refreshButton" type="button">Refresh now</button>
+        </div>
+      </div>
+      <div class="address-box dashboard-contract">
+        <span>Canonical SUNV contract</span>
+        <code>0x22fd16577ba869A7df77F4280ae08c65BB03111d</code>
+        <button class="copy-button wide" data-copy="0x22fd16577ba869A7df77F4280ae08c65BB03111d">Copy address</button>
+      </div>
+    </section>
+
+    <section class="section dashboard-section" id="market">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">01 · Live market</div>
+          <h2>Current SUNV / USDG market snapshot.</h2>
+        </div>
+        <p>Live fields refresh automatically about once per minute when the data provider is reachable. Displayed FDV is price-derived and is not the amount of cash in the pool.</p>
+      </div>
+
+      <div class="metrics-grid">
+        <article class="metric-card">
+          <span class="metric-label">SUNV price</span>
+          <strong class="metric-value" data-field="price">$—</strong>
+          <small data-field="priceNative">— USDG</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Liquidity</span>
+          <strong class="metric-value" data-field="liquidity">$—</strong>
+          <small>Pool liquidity reported by DEX Screener</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">24h volume</span>
+          <strong class="metric-value" data-field="volume24">$—</strong>
+          <small>Trading volume, not project revenue</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Price change · 24h</span>
+          <strong class="metric-value" data-field="change24">—</strong>
+          <small>Can be highly volatile with shallow liquidity</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">FDV</span>
+          <strong class="metric-value" data-field="fdv">$—</strong>
+          <small>Price × total supply; not redeemable cash</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Reported market cap</span>
+          <strong class="metric-value" data-field="marketCap">—</strong>
+          <small>Shown only if the data provider reports one</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="section dashboard-section" id="activity">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">02 · Market activity</div>
+          <h2>Track activity instead of headline valuation.</h2>
+        </div>
+        <p>For an early-stage pool, volume, independent transactions, holder growth and liquidity quality are more informative than FDV alone.</p>
+      </div>
+
+      <div class="metrics-grid">
+        <article class="metric-card">
+          <span class="metric-label">24h buys</span>
+          <strong class="metric-value" data-field="buys24">—</strong>
+          <small>Transactions classified as buys</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">24h sells</span>
+          <strong class="metric-value" data-field="sells24">—</strong>
+          <small>Transactions classified as sells</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">24h transactions</span>
+          <strong class="metric-value" data-field="txns24">—</strong>
+          <small>Buys + sells</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Pool created</span>
+          <strong class="metric-value metric-value-small" data-field="poolAge">—</strong>
+          <small data-field="poolCreated">—</small>
+        </article>
+      </div>
+
+      <div class="activity-bar" aria-label="24 hour buy and sell transaction mix">
+        <div class="activity-buy" id="buyBar" style="width:50%"></div>
+        <div class="activity-sell" id="sellBar" style="width:50%"></div>
+      </div>
+      <div class="activity-legend">
+        <span><i class="legend-dot buy-dot"></i> Buys <strong data-field="buyPct">—</strong></span>
+        <span><i class="legend-dot sell-dot"></i> Sells <strong data-field="sellPct">—</strong></span>
+      </div>
+    </section>
+
+    <section class="section dashboard-section" id="holders">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">03 · Holders</div>
+          <h2>Onchain holder count.</h2>
+        </div>
+        <p>The dashboard requests the token-holder list from Robinhood Chain Blockscout and counts returned holder addresses. If the API cannot be reached, use the direct Blockscout link.</p>
+      </div>
+
+      <div class="holder-panel">
+        <div>
+          <span class="metric-label">Blockscout holder count</span>
+          <strong class="holder-count" data-field="holders">—</strong>
+          <p class="holder-note" id="holderNote">Loading holder data…</p>
+        </div>
+        <a class="button button-secondary" href="https://robinhoodchain.blockscout.com/token/0x22fd16577ba869A7df77F4280ae08c65BB03111d?tab=holders" target="_blank" rel="noopener noreferrer">Verify holders on Blockscout ↗</a>
+      </div>
+    </section>
+
+    <section class="section dashboard-section" id="reserves">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">04 · Supply & reserves</div>
+          <h2>Snapshot disclosure, clearly separated from circulation.</h2>
+        </div>
+        <p>Snapshot date: September 22, 2026. These figures describe launch transfers and project-controlled balances; they are not a live circulating-supply calculation.</p>
+      </div>
+
+      <div class="tokenomics-grid" style="grid-template-columns:repeat(3,1fr);">
+        <article class="allocation">
+          <span>99,939,999</span>
+          <h3>Project reserve / deployer</h3>
+          <p>Remaining in the original deployer wallet after launch transfers.</p>
+        </article>
+        <article class="allocation">
+          <span>60,000</span>
+          <h3>Liquidity operations transfers</h3>
+          <p>Transferred to the dedicated liquidity wallet during launch setup and liquidity expansion.</p>
+        </article>
+        <article class="allocation">
+          <span>1</span>
+          <h3>Treasury validation transfer</h3>
+          <p>Used to validate the treasury address during launch setup.</p>
+        </article>
+      </div>
+
+      <div class="concentration-card">
+        <div>
+          <span class="metric-label">Project-reserve concentration · snapshot</span>
+          <strong>~99.94%</strong>
+          <p>This concentration is disclosed because it is a material project risk. No finalized circulating-supply figure is currently claimed.</p>
+        </div>
+        <div class="reserve-meter" aria-label="Approximately 99.94 percent project reserve">
+          <span style="width:99.94%"></span>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <a class="button button-secondary" href="/transparency.html">Full treasury disclosure</a>
+        <a class="button button-secondary" href="https://robinhoodchain.blockscout.com/address/0xE33e2DC38b2cFD57d54D8a4727CC681249f9792F" target="_blank" rel="noopener noreferrer">Reserve wallet ↗</a>
+        <a class="button button-secondary" href="https://robinhoodchain.blockscout.com/address/0x5ef599593E1735Af5a25121b5C04176d30604f8f" target="_blank" rel="noopener noreferrer">Liquidity wallet ↗</a>
+      </div>
+    </section>
+
+    <section class="section dashboard-section">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">05 · Current limitations</div>
+          <h2>What the dashboard does not hide.</h2>
+        </div>
+        <p>Source verification and public data improve transparency but do not remove financial, technical or custody risk.</p>
+      </div>
+      <div class="tokenomics-grid" style="grid-template-columns:repeat(3,1fr);">
+        <article class="allocation"><span>!</span><h3>Shallow liquidity</h3><p>Small trades can materially change the displayed price and FDV.</p></article>
+        <article class="allocation"><span>!</span><h3>Concentrated reserve</h3><p>Most SUNV remains controlled by the project deployer wallet.</p></article>
+        <article class="allocation"><span>!</span><h3>LP not presented as locked</h3><p>The current Uniswap v4 position remains under LP-owner control.</p></article>
+      </div>
+    </section>
+
+    <section class="section dashboard-section" id="sources">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">06 · Independent sources</div>
+          <h2>Check the raw data yourself.</h2>
+        </div>
+        <p>The dashboard is a convenience layer. External explorers and market trackers remain the primary way to independently verify activity.</p>
+      </div>
+      <div class="source-grid">
+        <a class="source-card" href="https://robinhoodchain.blockscout.com/token/0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer"><strong>Blockscout</strong><span>Contract, transfers and holders ↗</span></a>
+        <a class="source-card" href="https://www.geckoterminal.com/robinhood/pools/0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04" target="_blank" rel="noopener noreferrer"><strong>GeckoTerminal</strong><span>Pool chart and market activity ↗</span></a>
+        <a class="source-card" href="https://dexscreener.com/robinhood/0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04" target="_blank" rel="noopener noreferrer"><strong>DEX Screener</strong><span>Live market data used by this dashboard ↗</span></a>
+        <a class="source-card" href="https://www.dextools.io/app/robinhood/pair-explorer/0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04" target="_blank" rel="noopener noreferrer"><strong>DEXTools</strong><span>Independent pair explorer ↗</span></a>
+        <a class="source-card" href="https://app.uniswap.org/swap?chain=robinhood&inputCurrency=0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168&outputCurrency=0x22fd16577ba869A7df77F4280ae08c65BB03111d" target="_blank" rel="noopener noreferrer"><strong>Uniswap</strong><span>Canonical SUNV / USDG market ↗</span></a>
+        <a class="source-card" href="/litepaper.html"><strong>Litepaper v0.1</strong><span>Roadmap, model and risks →</span></a>
+      </div>
+      <p class="risk-note"><strong>Data note:</strong> Third-party APIs can be delayed, unavailable or inconsistent. A missing dashboard value does not mean the underlying onchain data is missing. Always verify material information directly at the linked source.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand"><img src="assets/sunv-icon.png" alt="" /><span>SUNV</span></div>
+    <p>SUNV is an independent token project and is not endorsed by Robinhood Markets, Inc., Uniswap Labs, DEX Screener, DEXTools or CoinGecko.</p>
+    <p class="footer-small">Live market data: DEX Screener API. Holder data: Robinhood Chain Blockscout API. Project-reserve data: SUNV project disclosure snapshot dated September 22, 2026.</p>
+    <p class="footer-small">Digital assets are volatile and can lose value. This dashboard is informational and does not promise returns or financial performance.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Contract copied</div>
+  <script src="app.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
