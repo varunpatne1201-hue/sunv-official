@@ -4,8 +4,9 @@ const SUNV = {
   chain: 'robinhood'
 };
 
-const dexUrl = `https://api.dexscreener.com/latest/dex/pairs/${SUNV.chain}/${SUNV.pair}`;
-const holdersUrl = `https://robinhoodchain.blockscout.com/api?module=token&action=getTokenHolders&contractaddress=${SUNV.contract}&page=1&offset=1000`;
+const DATA_API = 'https://sunv-data-api.onrender.com';
+const dexUrl = `${DATA_API}/api/market`;
+const holdersUrl = `${DATA_API}/api/holders`;
 
 const $field = (name) => document.querySelectorAll(`[data-field="${name}"]`);
 const setField = (name, value) => $field(name).forEach((el) => { el.textContent = value; });
@@ -59,21 +60,20 @@ function styleChange(value) {
 async function loadMarket() {
   const response = await fetch(dexUrl, { headers: { Accept: 'application/json' } });
   if (!response.ok) throw new Error(`DEX Screener HTTP ${response.status}`);
-  const payload = await response.json();
-  const pair = payload && Array.isArray(payload.pairs) ? payload.pairs[0] : null;
-  if (!pair) throw new Error('SUNV pair was not returned by DEX Screener');
+  const pair = await response.json();
+  if (!pair || pair.error) throw new Error(pair?.detail || 'SUNV market data unavailable');
 
   setField('price', money(pair.priceUsd, 8));
   setField('priceNative', pair.priceNative ? `${Number(pair.priceNative).toLocaleString(undefined, { maximumSignificantDigits: 7 })} USDG` : '— USDG');
-  setField('liquidity', money(pair.liquidity && pair.liquidity.usd));
-  setField('volume24', money(pair.volume && pair.volume.h24));
-  setField('change24', percent(pair.priceChange && pair.priceChange.h24));
-  styleChange(pair.priceChange && pair.priceChange.h24);
+  setField('liquidity', money(pair.liquidityUsd));
+  setField('volume24', money(pair.volume24));
+  setField('change24', percent(pair.priceChange24));
+  styleChange(pair.priceChange24);
   setField('fdv', compactMoney(pair.fdv));
   setField('marketCap', pair.marketCap == null ? 'Not verified' : compactMoney(pair.marketCap));
 
-  const buys = Number(pair.txns && pair.txns.h24 && pair.txns.h24.buys) || 0;
-  const sells = Number(pair.txns && pair.txns.h24 && pair.txns.h24.sells) || 0;
+  const buys = Number(pair.buys24) || 0;
+  const sells = Number(pair.sells24) || 0;
   const total = buys + sells;
   setField('buys24', buys.toLocaleString());
   setField('sells24', sells.toLocaleString());
@@ -96,12 +96,14 @@ async function loadHolders() {
   const response = await fetch(holdersUrl, { headers: { Accept: 'application/json' } });
   if (!response.ok) throw new Error(`Blockscout HTTP ${response.status}`);
   const payload = await response.json();
-  if (!payload || !Array.isArray(payload.result)) throw new Error('Holder list unavailable');
+  if (!payload || payload.error || !Number.isFinite(Number(payload.count))) {
+    throw new Error(payload?.detail || 'Holder count unavailable');
+  }
 
-  const count = payload.result.length;
-  setField('holders', count >= 1000 ? '1,000+' : count.toLocaleString());
+  const count = Number(payload.count);
+  setField('holders', payload.capped ? '1,000+' : count.toLocaleString());
   document.getElementById('holderNote').textContent =
-    count >= 1000
+    payload.capped
       ? 'At least 1,000 holder addresses returned. Verify the exact count on Blockscout.'
       : `Blockscout returned ${count.toLocaleString()} holder address${count === 1 ? '' : 'es'}.`;
 }
