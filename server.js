@@ -3,6 +3,7 @@ const http = require('http');
 const PORT = process.env.PORT || 10000;
 const CONTRACT = '0x22fd16577ba869A7df77F4280ae08c65BB03111d';
 const PAIR = '0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04';
+const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
 let marketCache = { data: null, expiresAt: 0 };
 
@@ -230,6 +231,133 @@ async function handleHolders(res) {
   }
 }
 
+
+function topicAddress(address) {
+  return '0x' + address.slice(2).toLowerCase().padStart(64, '0');
+}
+
+function addressFromTopic(topic) {
+  if (typeof topic !== 'string' || topic.length < 42) return null;
+  return '0x' + topic.slice(-40);
+}
+
+function sunvFromHex(hex) {
+  const raw = BigInt(hex || '0x0');
+  const whole = raw / 1000000000000000000n;
+  const fraction = raw % 1000000000000000000n;
+  const fractionText = fraction.toString().padStart(18, '0').replace(/0+$/, '');
+  return fractionText ? whole.toString() + '.' + fractionText : whole.toString();
+}
+
+async function getTransferLogsInRange(fromBlock, toBlock) {
+  return await rpcCall('eth_getLogs', [{
+    fromBlock: '0x' + fromBlock.toString(16),
+    toBlock: '0x' + toBlock.toString(16),
+    address: CONTRACT,
+    topics: [TRANSFER_TOPIC]
+  }]);
+}
+
+async function recentTransferLogsForAddress(address) {
+  const latestHex = await rpcCall('eth_blockNumber', []);
+  const latest = parseInt(latestHex, 16);
+  if (!Number.isFinite(latest)) throw new Error('Unable to read latest Robinhood Chain block');
+
+  const wanted = address.toLowerCase();
+  const maxScan = 500000;
+  const chunkSize = 50000;
+  const earliest = Math.max(0, latest - maxScan);
+  const matched = [];
+
+  for (let end = latest; end >= earliest && matched.length < 20; end -= chunkSize) {
+    const start = Math.max(earliest, end - chunkSize + 1);
+    let logs;
+    try {
+      logs = await getTransferLogsInRange(start, end);
+    } catch (error) {
+      console.warn('[ACTIVITY] log range failed', start, end, error.message);
+      continue;
+    }
+
+    if (!Array.isArray(logs)) continue;
+
+    for (const log of logs) {
+      const from = addressFromTopic(log?.topics?.[1]);
+      const to = addressFromTopic(log?.topics?.[2]);
+      if (from?.toLowerCase() === wanted || to?.toLowerCase() === wanted) {
+        matched.push(log);
+      }
+    }
+  }
+
+  return matched
+    .sort((a, b) => parseInt(b.blockNumber, 16) - parseInt(a.blockNumber, 16))
+    .slice(0, 20);
+}
+
+async function handleActivity(req, res) {
+  const body = await readJsonBody(req);
+  const address = String(body?.address || '').trim();
+
+  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    return json(res, 400, { error: 'Invalid EVM wallet address' });
+  }
+
+  const logs = await recentTransferLogsForAddress(address);
+  const uniqueBlocks = [...new Set(logs.map((log) => log.blockNumber))];
+  const blockPairs = await Promise.all(uniqueBlocks.map(async (blockNumber) => {
+    try {
+      const block = await rpcCall('eth_getBlockByNumber', [blockNumber, false]);
+      return [blockNumber, block?.timestamp ? parseInt(block.timestamp, 16) * 1000 : null];
+    } catch {
+      return [blockNumber, null];
+    }
+  }));
+  const timestamps = Object.fromEntries(blockPairs);
+  const wanted = address.toLowerCase();
+
+  const transfers = logs.map((log) => {
+    const from = addressFromTopic(log?.topics?.[1]);
+    const to = addressFromTopic(log?.topics?.[2]);
+    const fromLower = from?.toLowerCase();
+    const toLower = to?.toLowerCase();
+
+    let direction = 'TRANSFER';
+    let counterparty = null;
+    if (fromLower === wanted && toLower === wanted) {
+      direction = 'SELF';
+      counterparty = address;
+    } else if (toLower === wanted) {
+      direction = 'IN';
+      counterparty = from;
+    } else if (fromLower === wanted) {
+      direction = 'OUT';
+      counterparty = to;
+    }
+
+    return {
+      direction,
+      amountSunv: sunvFromHex(log.data),
+      from,
+      to,
+      counterparty,
+      txHash: log.transactionHash,
+      blockNumber: parseInt(log.blockNumber, 16),
+      timestamp: timestamps[log.blockNumber] ?? null,
+      logIndex: log.logIndex ? parseInt(log.logIndex, 16) : null
+    };
+  });
+
+  console.log('[ACTIVITY] address transfer count', transfers.length);
+  return json(res, 200, {
+    source: 'Robinhood Chain public RPC',
+    fetchedAt: new Date().toISOString(),
+    address,
+    scanWindowBlocks: 500000,
+    transfers
+  });
+}
+
 async function handleBalance(req, res) {
   const body = await readJsonBody(req);
   const address = String(body?.address || '').trim();
@@ -277,13 +405,17 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {
         ok: true,
         service: 'SUNV public data proxy',
-        version: '1.1',
+        version: '1.2',
         time: new Date().toISOString()
       });
     }
 
     if (req.method === 'POST' && req.url === '/api/balance') {
       return await handleBalance(req, res);
+    }
+
+    if (req.method === 'POST' && req.url === '/api/activity') {
+      return await handleActivity(req, res);
     }
 
     if (req.method !== 'GET') {
@@ -304,5 +436,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('SUNV data proxy v1.1 listening on port ' + PORT);
+  console.log('SUNV data proxy v1.2 listening on port ' + PORT);
 });
