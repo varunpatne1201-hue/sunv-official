@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SUNV Holder Hub Beta — Verify SUNV Holdings</title>
+  <title>SUNV Holder Hub v1.1 Beta — Verify & Share SUNV Holdings</title>
   <meta name="description" content="Read-only SUNV holder utility: verify a wallet's SUNV balance on Robinhood Chain, estimate current market value and view its share of fixed supply." />
   <meta name="theme-color" content="#080704" />
-  <meta property="og:title" content="SUNV Holder Hub Beta" />
+  <meta property="og:title" content="SUNV Holder Hub v1.1 Beta" />
   <meta property="og:description" content="A read-only onchain utility for verifying SUNV holdings on Robinhood Chain." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://sunvcoin.com/holder.html" />
@@ -39,9 +39,9 @@
   <main>
     <section class="section holder-hero" id="verify">
       <div>
-        <div class="eyebrow"><span class="status-dot"></span> Utility prototype · Beta</div>
+        <div class="eyebrow"><span class="status-dot"></span> Utility · v1.1 Beta</div>
         <h1>Your SUNV, <span>verified onchain.</span></h1>
-        <p class="hero-lead">Enter any public EVM wallet address or connect a browser wallet. The Holder Hub reads the SUNV ERC-20 balance from Robinhood Chain and combines it with live market data. It does not request a signature, approval or transaction.</p>
+        <p class="hero-lead">Enter any public EVM wallet address or connect a browser wallet. Holder Hub reads the SUNV ERC-20 balance from Robinhood Chain, combines it with live market data, and creates a shareable live-check link. It does not request a signature, approval or transaction.</p>
       </div>
 
       <div class="holder-lookup">
@@ -99,8 +99,20 @@
           <div>
             <span class="metric-label">Checked address</span>
             <code id="checkedAddress">—</code>
+            <span class="holder-verified-time">Checked <strong id="verifiedAt">—</strong></span>
           </div>
           <a id="explorerLink" class="button button-secondary" href="https://robinhoodchain.blockscout.com/" target="_blank" rel="noopener noreferrer">Open on Blockscout ↗</a>
+        </div>
+
+        <div class="holder-share-panel">
+          <div>
+            <span class="metric-label">Share a live verification</span>
+            <p>The shared link contains only the public wallet address. Opening it performs a fresh onchain balance check; it does not prove who owns the wallet.</p>
+          </div>
+          <div class="holder-share-actions">
+            <button id="copyLinkButton" class="button button-secondary" type="button" disabled>Copy verification link</button>
+            <button id="shareResultButton" class="button" type="button" disabled>Share live check</button>
+          </div>
         </div>
       </div>
 
@@ -122,6 +134,15 @@
         <article class="allocation"><span>03</span><h3>Safe by design</h3><p>No signing, approvals or token movements are required. Never enter a seed phrase or private key anywhere on this site.</p></article>
       </div>
 
+      <div class="feedback-card">
+        <div>
+          <span class="metric-label">Beta feedback</span>
+          <h3>Help improve Holder Hub.</h3>
+          <p>Found a problem or want a useful feature added? Send feedback to the official SUNV project email.</p>
+        </div>
+        <a class="button button-secondary" href="mailto:contact@sunvcoin.com?subject=SUNV%20Holder%20Hub%20v1.1%20Feedback">Send feedback</a>
+      </div>
+
       <div class="hero-actions">
         <a class="button button-secondary" href="/dashboard.html">Live transparency dashboard</a>
         <a class="button button-secondary" href="/transparency.html">Treasury disclosure</a>
@@ -132,11 +153,11 @@
 
   <footer>
     <div class="footer-brand"><img src="assets/sunv-icon.png" alt="" /><span>SUNV</span></div>
-    <p>SUNV Holder Hub Beta · Read-only utility prototype.</p>
+    <p>SUNV Holder Hub v1.1 Beta · Read-only wallet verification utility with shareable live-check links.</p>
     <p class="footer-small">Robinhood Chain mainnet · Chain ID 4663 · Canonical contract: 0x22fd16577ba869A7df77F4280ae08c65BB03111d</p>
     <p class="footer-small">SUNV is independent and is not endorsed by Robinhood Markets, Inc. Digital assets are volatile and can lose value.</p>
   </footer>
 
-  <script src="holder.js?v=20260922-1"></script>
+  <script src="holder.js?v=20260922-2"></script>
 </body>
 </html>
