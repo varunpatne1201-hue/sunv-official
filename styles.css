@@ -319,3 +319,98 @@ footer { width:min(1180px,calc(100% - 36px));margin:0 auto;padding:0 0 50px;colo
   .holder-panel { align-items:flex-start; flex-direction:column; }
   .activity-legend { justify-content:space-between; }
 }
+
+
+/* Public build log */
+.buildlog-hero {
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:42px;
+  align-items:end;
+  padding-bottom:72px;
+}
+.buildlog-summary {
+  padding:30px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:linear-gradient(155deg,rgba(255,186,52,.07),rgba(255,255,255,.018));
+}
+.buildlog-summary strong {
+  display:block;
+  color:#ffd36d;
+  font-size:clamp(1.7rem,3vw,2.6rem);
+  line-height:1.05;
+  margin:8px 0 14px;
+}
+.buildlog-summary p { color:var(--muted); margin:0; }
+.buildlog-section { padding-top:58px; padding-bottom:58px; }
+.buildlog-list { display:grid; gap:14px; }
+.buildlog-entry {
+  display:grid;
+  grid-template-columns:110px 1fr;
+  gap:24px;
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:linear-gradient(150deg,rgba(255,186,52,.055),rgba(255,255,255,.014));
+}
+.buildlog-date {
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:flex-start;
+}
+.buildlog-date span {
+  color:#ffd36d;
+  font-size:2.6rem;
+  font-weight:900;
+  line-height:1;
+}
+.buildlog-date small {
+  margin-top:7px;
+  color:var(--muted);
+  font-size:.7rem;
+  letter-spacing:.12em;
+}
+.buildlog-tag {
+  display:inline-flex;
+  padding:5px 9px;
+  border-radius:999px;
+  border:1px solid rgba(114,229,142,.18);
+  color:#95f0a8;
+  background:rgba(78,219,103,.055);
+  font-size:.68rem;
+  font-weight:900;
+  letter-spacing:.09em;
+  margin-bottom:10px;
+}
+.buildlog-entry h3 {
+  margin:0 0 8px;
+  font-size:1.35rem;
+}
+.buildlog-entry p {
+  margin:0;
+  color:var(--muted);
+  max-width:850px;
+}
+.buildlog-links {
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+  margin-top:14px;
+}
+.buildlog-links a {
+  color:#ffd36d;
+  font-weight:800;
+  font-size:.86rem;
+}
+.buildlog-links a:hover { color:#fff0b0; }
+
+@media (max-width: 960px) {
+  .buildlog-hero { grid-template-columns:1fr; }
+}
+@media (max-width: 640px) {
+  .buildlog-entry { grid-template-columns:1fr; gap:12px; }
+  .buildlog-date { flex-direction:row; align-items:baseline; gap:8px; }
+  .buildlog-date span { font-size:2rem; }
+}
