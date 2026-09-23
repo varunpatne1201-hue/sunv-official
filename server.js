@@ -132,22 +132,34 @@ async function handleMarket(res) {
 }
 
 async function handleHolders(res) {
-  const url =
-    'https://robinhoodchain.blockscout.com/api?module=token&action=getTokenHolders&contractaddress=' +
-    CONTRACT +
-    '&page=1&offset=1000';
-  const data = await fetchJson(url);
+  // Prefer Blockscout's current v2 API. The legacy Etherscan-style endpoint
+  // can return 403 on Robinhood Chain even though the public explorer works.
+  const tokenUrl = 'https://robinhoodchain.blockscout.com/api/v2/tokens/' + CONTRACT;
+  const token = await fetchJson(tokenUrl);
 
-  if (!data || !Array.isArray(data.result)) {
-    throw new Error('Blockscout holder list unavailable');
+  let count = Number(
+    token?.holders_count ??
+    token?.holders ??
+    token?.holder_count
+  );
+
+  // Some Blockscout versions omit holders_count from token details.
+  // For small/new tokens, count the public holder list as a fallback.
+  if (!Number.isFinite(count)) {
+    const holdersUrl = 'https://robinhoodchain.blockscout.com/api/v2/tokens/' + CONTRACT + '/holders';
+    const holders = await fetchJson(holdersUrl);
+    if (!holders || !Array.isArray(holders.items)) {
+      throw new Error('Blockscout v2 holder data unavailable');
+    }
+    count = holders.items.length;
   }
 
-  console.log('[HOLDERS]', data.result.length);
+  console.log('[HOLDERS]', count);
   json(res, 200, {
-    source: 'Robinhood Chain Blockscout',
+    source: 'Robinhood Chain Blockscout v2',
     fetchedAt: new Date().toISOString(),
-    count: data.result.length,
-    capped: data.result.length >= 1000
+    count,
+    capped: false
   });
 }
 
