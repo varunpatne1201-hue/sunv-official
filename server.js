@@ -551,7 +551,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {
         ok: true,
         service: 'SUNV public data proxy',
-        version: '1.3',
+        version: '1.4',
         time: new Date().toISOString()
       });
     }
@@ -582,5 +582,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('SUNV data proxy v1.3 listening on port ' + PORT);
+  console.log('SUNV data proxy v1.4 listening on port ' + PORT);
 });
