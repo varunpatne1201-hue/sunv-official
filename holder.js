@@ -41,6 +41,26 @@ function formatCheckedTime(date) {
   });
 }
 
+function formatActivityTime(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function formatSignedSunv(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  const sign = n > 0 ? '+' : '';
+  return sign + formatSunv(n) + ' SUNV';
+}
+
 function shareUrl(address) {
   const url = new URL(window.location.href);
   url.search = '';
@@ -70,6 +90,19 @@ function setLoading(on) {
   verifyButton.textContent = on ? 'Checking…' : 'Verify holdings';
 }
 
+function resetAnalytics() {
+  document.getElementById('analyticsReceived').textContent = '—';
+  document.getElementById('analyticsSent').textContent = '—';
+  document.getElementById('analyticsNet').textContent = '—';
+  document.getElementById('analyticsEvents').textContent = '—';
+  document.getElementById('analyticsCounterparties').textContent = '—';
+  document.getElementById('analyticsFirst').textContent = '—';
+  document.getElementById('analyticsLatest').textContent = '—';
+  document.getElementById('analyticsReconcile').textContent = 'Not checked';
+  document.getElementById('analyticsCoverage').textContent =
+    'Verify a wallet to calculate onchain analytics.';
+}
+
 function resetActivity() {
   document.getElementById('receivedCount').textContent = '—';
   document.getElementById('sentCount').textContent = '—';
@@ -77,6 +110,7 @@ function resetActivity() {
   document.getElementById('activityScanNote').textContent = 'Verify a wallet to load recent activity.';
   document.getElementById('transferList').innerHTML =
     '<div class="transfer-empty">Verify a wallet to load recent SUNV transfer activity.</div>';
+  resetAnalytics();
 }
 
 function resetResult() {
@@ -127,22 +161,74 @@ function shortAddress(address) {
   return address.slice(0, 6) + '…' + address.slice(-4);
 }
 
+function renderAnalytics(payload) {
+  const analytics = payload?.analytics || {};
+  const fullyScanned = analytics.fullyScanned === true;
+  const received = Number(analytics.totalReceivedSunv);
+  const sent = Number(analytics.totalSentSunv);
+  const net = Number(analytics.netFlowSunv);
+
+  document.getElementById('analyticsReceived').textContent =
+    Number.isFinite(received) ? formatSunv(received) + ' SUNV' : '—';
+  document.getElementById('analyticsSent').textContent =
+    Number.isFinite(sent) ? formatSunv(sent) + ' SUNV' : '—';
+  document.getElementById('analyticsNet').textContent =
+    Number.isFinite(net) ? formatSignedSunv(net) : '—';
+  document.getElementById('analyticsEvents').textContent =
+    Number.isFinite(Number(analytics.transferEvents))
+      ? Number(analytics.transferEvents).toLocaleString()
+      : '—';
+  document.getElementById('analyticsCounterparties').textContent =
+    Number.isFinite(Number(analytics.uniqueCounterparties))
+      ? Number(analytics.uniqueCounterparties).toLocaleString()
+      : '—';
+  document.getElementById('analyticsFirst').textContent =
+    formatActivityTime(analytics.firstActivityAt);
+  document.getElementById('analyticsLatest').textContent =
+    formatActivityTime(analytics.mostRecentActivityAt);
+
+  let reconciliation = 'Unavailable';
+  if (fullyScanned && currentResult && Number.isFinite(net) && Number.isFinite(currentResult.balance)) {
+    const tolerance = Math.max(0.000001, Math.abs(currentResult.balance) * 1e-9);
+    reconciliation = Math.abs(net - currentResult.balance) <= tolerance
+      ? 'Matches balance ✓'
+      : 'Needs review';
+  } else if (!fullyScanned) {
+    reconciliation = 'Partial coverage';
+  }
+  document.getElementById('analyticsReconcile').textContent = reconciliation;
+
+  document.getElementById('analyticsCoverage').textContent = fullyScanned
+    ? 'Analytics were calculated from SUNV Transfer events scanned from the detected contract-deployment block through the current chain tip.'
+    : 'Analytics are based on a partial onchain scan. Treat totals as observed values, not complete lifetime totals.';
+
+  if (currentResult) currentResult.analytics = analytics;
+}
+
 function renderActivity(payload) {
   const transfers = Array.isArray(payload?.transfers) ? payload.transfers : [];
-  const incoming = transfers.filter((t) => t.direction === 'IN').length;
-  const outgoing = transfers.filter((t) => t.direction === 'OUT').length;
+  const analytics = payload?.analytics || {};
+  const incoming = Number.isFinite(Number(analytics.incomingEvents))
+    ? Number(analytics.incomingEvents)
+    : transfers.filter((t) => t.direction === 'IN').length;
+  const outgoing = Number.isFinite(Number(analytics.outgoingEvents))
+    ? Number(analytics.outgoingEvents)
+    : transfers.filter((t) => t.direction === 'OUT').length;
 
   document.getElementById('receivedCount').textContent = incoming.toLocaleString();
   document.getElementById('sentCount').textContent = outgoing.toLocaleString();
-  document.getElementById('activityStatus').textContent = transfers.length ? 'Loaded' : 'No recent transfers';
+  document.getElementById('activityStatus').textContent =
+    transfers.length ? (analytics.fullyScanned ? 'History loaded' : 'Recent activity loaded') : 'No transfers found';
   document.getElementById('activityScanNote').textContent =
     transfers.length
-      ? 'Showing up to 20 recent SUNV transfer events found in the current RPC scan window.'
-      : 'No SUNV transfer events were found for this wallet in the current RPC scan window.';
+      ? 'Showing up to 20 most recent SUNV transfer events. Wallet analytics summarize the scanned history.'
+      : 'No SUNV transfer events were found for this wallet in the scanned history.';
+
+  renderAnalytics(payload);
 
   const list = document.getElementById('transferList');
   if (!transfers.length) {
-    list.innerHTML = '<div class="transfer-empty">No recent SUNV transfers found in the current scan window.</div>';
+    list.innerHTML = '<div class="transfer-empty">No SUNV transfers found in the scanned history.</div>';
     return;
   }
 
@@ -167,11 +253,12 @@ function renderActivity(payload) {
       '</article>';
   }).join('');
 }
-
 async function loadActivity(address) {
   document.getElementById('activityStatus').textContent = 'Loading…';
   document.getElementById('activityScanNote').textContent = 'Reading SUNV Transfer events from Robinhood Chain.';
   document.getElementById('transferList').innerHTML = '<div class="transfer-empty">Loading recent transfer activity…</div>';
+  document.getElementById('analyticsReconcile').textContent = 'Loading…';
+  document.getElementById('analyticsCoverage').textContent = 'Scanning SUNV wallet history for analytics…';
 
   try {
     const payload = await fetchActivity(address);
@@ -183,6 +270,10 @@ async function loadActivity(address) {
     document.getElementById('activityScanNote').textContent = 'Recent transfer activity could not be loaded right now.';
     document.getElementById('transferList').innerHTML =
       '<div class="transfer-empty">Activity feed temporarily unavailable. Use Blockscout from the wallet result to verify transactions.</div>';
+    resetAnalytics();
+    document.getElementById('analyticsReconcile').textContent = 'Unavailable';
+    document.getElementById('analyticsCoverage').textContent =
+      'Wallet analytics could not be calculated because the activity feed is temporarily unavailable.';
   }
 }
 
@@ -316,11 +407,18 @@ shareResultButton.addEventListener('click', async () => {
   const valueText = currentResult.estimatedValue === null
     ? ''
     : ' · displayed value ' + formatMoney(currentResult.estimatedValue);
+  const analytics = currentResult.analytics || null;
+  const analyticsText = analytics && analytics.fullyScanned
+    ? ' Wallet analytics: ' + formatSunv(analytics.totalReceivedSunv) + ' SUNV received, ' +
+      formatSunv(analytics.totalSentSunv) + ' SUNV sent across ' +
+      Number(analytics.transferEvents || 0).toLocaleString() + ' observed transfer events.'
+    : '';
   const text =
     'Public wallet ' + currentResult.address +
     ' held ' + formatSunv(currentResult.balance) + ' SUNV' + valueText +
-    ' when checked at ' + formatCheckedTime(currentResult.checkedAt) +
-    '. Open the link for a fresh onchain check. Wallet ownership is not asserted.';
+    ' when checked at ' + formatCheckedTime(currentResult.checkedAt) + '.' +
+    analyticsText +
+    ' Open the link for a fresh onchain check. Wallet ownership is not asserted.';
 
   const url = shareUrl(currentResult.address);
 
