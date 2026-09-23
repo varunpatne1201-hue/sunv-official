@@ -97,18 +97,30 @@ async function loadMarket() {
 
 async function loadHolders() {
   const response = await fetch(holdersUrl, { headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error(`Blockscout HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`Holder service HTTP ${response.status}`);
   const payload = await response.json();
-  if (!payload || payload.error || !Number.isFinite(Number(payload.count))) {
-    throw new Error(payload?.detail || 'Holder count unavailable');
+
+  if (payload?.live && Number.isFinite(Number(payload.count))) {
+    const count = Number(payload.count);
+    setField('holders', payload.capped ? '1,000+' : count.toLocaleString());
+    document.getElementById('holderNote').textContent =
+      payload.capped
+        ? 'At least 1,000 holder addresses returned. Verify the exact count on Blockscout.'
+        : `Live Blockscout count: ${count.toLocaleString()} holder address${count === 1 ? '' : 'es'}.`;
+    return;
   }
 
-  const count = Number(payload.count);
-  setField('holders', payload.capped ? '1,000+' : count.toLocaleString());
+  if (Number.isFinite(Number(payload?.lastVerifiedCount))) {
+    const count = Number(payload.lastVerifiedCount);
+    setField('holders', count.toLocaleString() + '*');
+    document.getElementById('holderNote').textContent =
+      `Last verified snapshot: ${count.toLocaleString()} holders on Sep 21, 2026. Blockscout's API is currently blocking server requests; use the button for the live count.`;
+    return;
+  }
+
+  setField('holders', 'Unavailable');
   document.getElementById('holderNote').textContent =
-    payload.capped
-      ? 'At least 1,000 holder addresses returned. Verify the exact count on Blockscout.'
-      : `Blockscout returned ${count.toLocaleString()} holder address${count === 1 ? '' : 'es'}.`;
+    'Live holder data is temporarily unavailable. Use the Blockscout button to verify the current count.';
 }
 
 let refreshing = false;
