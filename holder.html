@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SUNV Holder Hub v1.3 Beta — Wallet Analytics</title>
-  <meta name="description" content="Read-only SUNV wallet analytics: verify holdings, recent transfers, received/sent totals, counterparties and activity history on Robinhood Chain." />
+  <title>SUNV Holder Hub v1.4 Beta — Wallet Analytics</title>
+  <meta name="description" content="Read-only SUNV wallet analytics with visual flow comparison, activity timeline, holdings, transfers and shareable live-check links on Robinhood Chain." />
   <meta name="theme-color" content="#080704" />
-  <meta property="og:title" content="SUNV Holder Hub v1.3 Beta" />
-  <meta property="og:description" content="Read-only SUNV wallet analytics with holdings, transfer history, received/sent totals and shareable live-check links on Robinhood Chain." />
+  <meta property="og:title" content="SUNV Holder Hub v1.4 Beta" />
+  <meta property="og:description" content="Read-only SUNV wallet analytics with visual received-vs-sent flow, activity timeline, transfer history and shareable live-check links on Robinhood Chain." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://sunvcoin.com/holder.html" />
   <meta property="og:image" content="assets/sunv-hero.png" />
@@ -31,6 +31,7 @@
       <a href="#results">Results</a>
       <a href="#activity">Activity</a>
       <a href="#analytics">Analytics</a>
+      <a href="#visuals">Visuals</a>
       <a href="#safety">Safety</a>
       <a href="/dashboard.html">Dashboard</a>
       <a href="/updates.html">Updates</a>
@@ -41,7 +42,7 @@
   <main>
     <section class="section holder-hero" id="verify">
       <div>
-        <div class="eyebrow"><span class="status-dot"></span> Utility · v1.3 Beta</div>
+        <div class="eyebrow"><span class="status-dot"></span> Utility · v1.4 Beta</div>
         <h1>Your SUNV, <span>verified onchain.</span></h1>
         <p class="hero-lead">Enter any public EVM wallet address or connect a browser wallet. Holder Hub reads the SUNV ERC-20 balance from Robinhood Chain, shows recent transfers, calculates wallet-level SUNV analytics, combines the balance with live market data, and creates a shareable live-check link. It does not request a signature, approval or transaction.</p>
       </div>
@@ -157,7 +158,7 @@
     <section class="section holder-analytics-section" id="analytics">
       <div class="section-heading">
         <div>
-          <div class="section-kicker">Wallet analytics · v1.3</div>
+          <div class="section-kicker">Wallet analytics · v1.4</div>
           <h2>Understand the wallet, not just the balance.</h2>
         </div>
         <p>Holder Hub summarizes SUNV transfer events for the checked wallet. When full contract-lifetime coverage is available, totals are calculated from the detected SUNV deployment block through the current chain tip.</p>
@@ -214,6 +215,66 @@
       <p class="risk-note"><strong>Analytics limitation:</strong> these figures describe onchain SUNV transfers for a public address. They do not identify the person controlling the wallet, establish cost basis, calculate profit/loss, or account for offchain activity.</p>
     </section>
 
+    <section class="section holder-visuals-section" id="visuals">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">Visual analytics · v1.4</div>
+          <h2>See the wallet's SUNV flow at a glance.</h2>
+        </div>
+        <p>The visual layer turns the same read-only onchain data into a received-vs-sent comparison and a recent transfer timeline. It does not add predictions, scores or profit claims.</p>
+      </div>
+
+      <div class="wallet-visual-grid">
+        <article class="wallet-visual-card">
+          <div class="visual-card-head">
+            <div>
+              <span class="metric-label">Observed transfer flow</span>
+              <h3>Received vs. sent</h3>
+            </div>
+            <strong id="visualNetFlow">—</strong>
+          </div>
+
+          <div class="flow-comparison">
+            <div class="flow-row">
+              <div class="flow-label"><span class="flow-dot flow-dot-in"></span>Received</div>
+              <div class="flow-track"><div id="flowReceivedBar" class="flow-bar flow-bar-in"></div></div>
+              <strong id="flowReceivedValue">—</strong>
+            </div>
+            <div class="flow-row">
+              <div class="flow-label"><span class="flow-dot flow-dot-out"></span>Sent</div>
+              <div class="flow-track"><div id="flowSentBar" class="flow-bar flow-bar-out"></div></div>
+              <strong id="flowSentValue">—</strong>
+            </div>
+          </div>
+
+          <div class="flow-foot">
+            <span id="visualFlowNote">Verify a wallet to visualize transfer flow.</span>
+          </div>
+        </article>
+
+        <article class="wallet-visual-card">
+          <div class="visual-card-head">
+            <div>
+              <span class="metric-label">Recent transfer timeline</span>
+              <h3>Direction & relative size</h3>
+            </div>
+            <strong id="timelineEventCount">—</strong>
+          </div>
+
+          <div id="activityTimeline" class="activity-timeline" aria-label="Recent SUNV transfer activity timeline">
+            <div class="timeline-empty">Verify a wallet to visualize recent SUNV transfers.</div>
+          </div>
+
+          <div class="timeline-legend">
+            <span><i class="flow-dot flow-dot-in"></i>Incoming</span>
+            <span><i class="flow-dot flow-dot-out"></i>Outgoing</span>
+          </div>
+        </article>
+      </div>
+
+      <p class="risk-note"><strong>Visualization note:</strong> bar lengths are relative to the largest displayed value and the timeline shows only the recent transfer events returned by Holder Hub. Visual size is not a valuation or performance score.</p>
+    </section>
+
     <section class="section holder-tools" id="safety">
       <div class="section-heading">
         <div>
@@ -248,11 +309,11 @@
 
   <footer>
     <div class="footer-brand"><img src="assets/sunv-icon.png" alt="" /><span>SUNV</span></div>
-    <p>SUNV Holder Hub v1.3 Beta · Read-only wallet verification, transfer activity and wallet analytics with shareable live-check links.</p>
+    <p>SUNV Holder Hub v1.4 Beta · Read-only wallet verification, transfer activity and wallet analytics with shareable live-check links.</p>
     <p class="footer-small">Robinhood Chain mainnet · Chain ID 4663 · Canonical contract: 0x22fd16577ba869A7df77F4280ae08c65BB03111d</p>
     <p class="footer-small">SUNV is independent and is not endorsed by Robinhood Markets, Inc. Digital assets are volatile and can lose value.</p>
   </footer>
 
-  <script src="holder.js?v=20260922-4"></script>
+  <script src="holder.js?v=20260922-5"></script>
 </body>
 </html>
