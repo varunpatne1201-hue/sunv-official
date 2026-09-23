@@ -53,33 +53,55 @@ async function readJsonBody(req) {
 }
 
 async function rpcCall(method, params) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000);
-  try {
-    const response = await fetch('https://rpc.mainnet.chain.robinhood.com', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'SUNV-Holder-Hub/1.0'
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method,
-        params
-      }),
-      signal: controller.signal
-    });
-    if (!response.ok) throw new Error('Robinhood RPC HTTP ' + response.status);
-    const payload = await response.json();
-    if (payload.error) throw new Error(payload.error.message || 'Robinhood RPC error');
-    return payload.result;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
+  const delays = [0, 350, 900, 1800];
+  let lastError = null;
 
+  for (let attempt = 0; attempt < delays.length; attempt += 1) {
+    if (delays[attempt]) {
+      await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const response = await fetch('https://rpc.mainnet.chain.robinhood.com', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'SUNV-Holder-Hub/1.3'
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method,
+          params
+        }),
+        signal: controller.signal
+      });
+
+      if (response.status === 429 || response.status >= 500) {
+        throw new Error('Robinhood RPC HTTP ' + response.status);
+      }
+      if (!response.ok) throw new Error('Robinhood RPC HTTP ' + response.status);
+
+      const payload = await response.json();
+      if (payload.error) throw new Error(payload.error.message || 'Robinhood RPC error');
+      return payload.result;
+    } catch (error) {
+      lastError = error;
+      const retryable =
+        /HTTP 429|HTTP 5\d\d|aborted|fetch failed/i.test(String(error?.message || error));
+      if (!retryable || attempt === delays.length - 1) throw error;
+      console.warn('[RPC] retry', method, 'attempt', attempt + 1, error.message);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  throw lastError || new Error('Robinhood RPC request failed');
+}
 async function fetchJson(url) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
