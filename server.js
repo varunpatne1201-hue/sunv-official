@@ -6,6 +6,7 @@ const PAIR = '0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
 let marketCache = { data: null, expiresAt: 0 };
+let contractDeploymentBlockCache = null;
 
 const allowedOrigins = new Set([
   'https://sunvcoin.com',
@@ -272,20 +273,55 @@ async function getWalletTransferLogsInRange(address, fromBlock, toBlock) {
   });
 }
 
-async function recentTransferLogsForAddress(address) {
+async function getContractDeploymentBlock(latestBlock) {
+  if (Number.isFinite(contractDeploymentBlockCache)) return contractDeploymentBlockCache;
+
+  let low = 0;
+  let high = latestBlock;
+  let firstWithCode = latestBlock;
+
+  try {
+    const latestCode = await rpcCall('eth_getCode', [CONTRACT, 'latest']);
+    if (!latestCode || latestCode === '0x') {
+      throw new Error('SUNV contract code is unavailable at latest block');
+    }
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const blockTag = '0x' + mid.toString(16);
+      const code = await rpcCall('eth_getCode', [CONTRACT, blockTag]);
+
+      if (code && code !== '0x') {
+        firstWithCode = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    contractDeploymentBlockCache = firstWithCode;
+    console.log('[ACTIVITY] detected contract deployment block', firstWithCode);
+    return firstWithCode;
+  } catch (error) {
+    const fallback = Math.max(0, latestBlock - 5000000);
+    console.warn('[ACTIVITY] deployment block detection failed, using fallback', error.message);
+    return fallback;
+  }
+}
+
+async function transferLogsForAddress(address) {
   const latestHex = await rpcCall('eth_blockNumber', []);
   const latest = parseInt(latestHex, 16);
   if (!Number.isFinite(latest)) throw new Error('Unable to read latest Robinhood Chain block');
 
-  // Robinhood Chain can advance quickly, so scan a much wider window than v1.2 initially did.
-  // Topic-filtering by wallet keeps the RPC requests narrow.
-  const maxScan = 5000000;
-  const earliest = Math.max(0, latest - maxScan);
+  const earliest = await getContractDeploymentBlock(latest);
   const matched = [];
   let end = latest;
   let successfulRanges = 0;
+  let fullyScanned = true;
+  const maxEvents = 1000;
 
-  while (end >= earliest && matched.length < 20) {
+  while (end >= earliest) {
     let chunkSize = 100000;
     let logs = null;
     let start = Math.max(earliest, end - chunkSize + 1);
@@ -301,12 +337,19 @@ async function recentTransferLogsForAddress(address) {
     }
 
     if (logs === null) {
+      fullyScanned = false;
       end = start - 1;
       continue;
     }
 
     successfulRanges += 1;
     matched.push(...logs);
+
+    if (matched.length >= maxEvents) {
+      fullyScanned = false;
+      break;
+    }
+
     end = start - 1;
   }
 
@@ -314,19 +357,21 @@ async function recentTransferLogsForAddress(address) {
     throw new Error('Robinhood Chain log provider did not return a readable transfer range');
   }
 
+  const sorted = matched
+    .sort((a, b) => {
+      const blockDiff = parseInt(a.blockNumber, 16) - parseInt(b.blockNumber, 16);
+      if (blockDiff !== 0) return blockDiff;
+      return parseInt(a.logIndex || '0x0', 16) - parseInt(b.logIndex || '0x0', 16);
+    })
+    .slice(0, maxEvents);
+
   return {
     latestBlock: latest,
-    earliestBlock: Math.max(earliest, end + 1),
-    logs: matched
-      .sort((a, b) => {
-        const blockDiff = parseInt(b.blockNumber, 16) - parseInt(a.blockNumber, 16);
-        if (blockDiff !== 0) return blockDiff;
-        return parseInt(b.logIndex || '0x0', 16) - parseInt(a.logIndex || '0x0', 16);
-      })
-      .slice(0, 20)
+    earliestBlock: earliest,
+    fullyScanned,
+    logs: sorted
   };
 }
-
 async function handleActivity(req, res) {
   const body = await readJsonBody(req);
   const address = String(body?.address || '').trim();
@@ -335,10 +380,17 @@ async function handleActivity(req, res) {
     return json(res, 400, { error: 'Invalid EVM wallet address' });
   }
 
-  const scan = await recentTransferLogsForAddress(address);
-  const logs = scan.logs;
-  const uniqueBlocks = [...new Set(logs.map((log) => log.blockNumber))];
-  const blockPairs = await Promise.all(uniqueBlocks.map(async (blockNumber) => {
+  const scan = await transferLogsForAddress(address);
+  const allLogs = scan.logs;
+  const displayLogs = allLogs.slice(-20).reverse();
+
+  const timestampBlocks = new Set(displayLogs.map((log) => log.blockNumber));
+  if (allLogs.length) {
+    timestampBlocks.add(allLogs[0].blockNumber);
+    timestampBlocks.add(allLogs[allLogs.length - 1].blockNumber);
+  }
+
+  const blockPairs = await Promise.all([...timestampBlocks].map(async (blockNumber) => {
     try {
       const block = await rpcCall('eth_getBlockByNumber', [blockNumber, false]);
       return [blockNumber, block?.timestamp ? parseInt(block.timestamp, 16) * 1000 : null];
@@ -349,7 +401,7 @@ async function handleActivity(req, res) {
   const timestamps = Object.fromEntries(blockPairs);
   const wanted = address.toLowerCase();
 
-  const transfers = logs.map((log) => {
+  function decodeTransfer(log) {
     const from = addressFromTopic(log?.topics?.[1]);
     const to = addressFromTopic(log?.topics?.[2]);
     const fromLower = from?.toLowerCase();
@@ -371,6 +423,7 @@ async function handleActivity(req, res) {
     return {
       direction,
       amountSunv: sunvFromHex(log.data),
+      amountRaw: BigInt(log.data || '0x0'),
       from,
       to,
       counterparty,
@@ -379,20 +432,55 @@ async function handleActivity(req, res) {
       timestamp: timestamps[log.blockNumber] ?? null,
       logIndex: log.logIndex ? parseInt(log.logIndex, 16) : null
     };
-  });
+  }
 
-  console.log('[ACTIVITY] address transfer count', transfers.length);
+  const allTransfers = allLogs.map(decodeTransfer);
+  const transfers = displayLogs.map(decodeTransfer);
+
+  let receivedRaw = 0n;
+  let sentRaw = 0n;
+  const counterparties = new Set();
+
+  for (const transfer of allTransfers) {
+    if (transfer.direction === 'IN') receivedRaw += transfer.amountRaw;
+    if (transfer.direction === 'OUT') sentRaw += transfer.amountRaw;
+    if (transfer.counterparty && transfer.direction !== 'SELF') {
+      counterparties.add(transfer.counterparty.toLowerCase());
+    }
+  }
+
+  const firstLog = allLogs[0] || null;
+  const lastLog = allLogs[allLogs.length - 1] || null;
+  const receivedSunv = sunvFromHex('0x' + receivedRaw.toString(16));
+  const sentSunv = sunvFromHex('0x' + sentRaw.toString(16));
+  const netRaw = receivedRaw - sentRaw;
+  const netNegative = netRaw < 0n;
+  const netAbs = netNegative ? -netRaw : netRaw;
+  const netSunv = (netNegative ? '-' : '') + sunvFromHex('0x' + netAbs.toString(16));
+
+  console.log('[ACTIVITY] address transfer count', allTransfers.length, 'fullyScanned', scan.fullyScanned);
   return json(res, 200, {
     source: 'Robinhood Chain public RPC',
     fetchedAt: new Date().toISOString(),
     address,
-    scanWindowBlocks: 5000000,
     scannedFromBlock: scan.earliestBlock,
     scannedToBlock: scan.latestBlock,
-    transfers
+    coverage: scan.fullyScanned ? 'contract-lifetime' : 'partial',
+    transfers,
+    analytics: {
+      transferEvents: allTransfers.length,
+      incomingEvents: allTransfers.filter((t) => t.direction === 'IN').length,
+      outgoingEvents: allTransfers.filter((t) => t.direction === 'OUT').length,
+      totalReceivedSunv: receivedSunv,
+      totalSentSunv: sentSunv,
+      netFlowSunv: netSunv,
+      uniqueCounterparties: counterparties.size,
+      firstActivityAt: firstLog ? (timestamps[firstLog.blockNumber] ?? null) : null,
+      mostRecentActivityAt: lastLog ? (timestamps[lastLog.blockNumber] ?? null) : null,
+      fullyScanned: scan.fullyScanned
+    }
   });
 }
-
 async function handleBalance(req, res) {
   const body = await readJsonBody(req);
   const address = String(body?.address || '').trim();
@@ -440,7 +528,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {
         ok: true,
         service: 'SUNV public data proxy',
-        version: '1.2',
+        version: '1.3',
         time: new Date().toISOString()
       });
     }
@@ -471,5 +559,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('SUNV data proxy v1.2 listening on port ' + PORT);
+  console.log('SUNV data proxy v1.3 listening on port ' + PORT);
 });
