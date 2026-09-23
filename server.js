@@ -4,6 +4,8 @@ const PORT = process.env.PORT || 10000;
 const CONTRACT = '0x22fd16577ba869A7df77F4280ae08c65BB03111d';
 const PAIR = '0x0ebdefc82e75748e1699a4b79f1f6e3f975deb3f92feed77ca0d4a3df68c3f04';
 
+let marketCache = { data: null, expiresAt: 0 };
+
 const allowedOrigins = new Set([
   'https://sunvcoin.com',
   'https://www.sunvcoin.com',
@@ -107,6 +109,10 @@ async function marketFromGeckoTerminal() {
 }
 
 async function handleMarket(res) {
+  if (marketCache.data && Date.now() < marketCache.expiresAt) {
+    return json(res, 200, marketCache.data);
+  }
+
   let market;
   let primaryError = null;
   try {
@@ -115,6 +121,12 @@ async function handleMarket(res) {
     primaryError = error.message;
     market = await marketFromGeckoTerminal();
   }
+
+  const payload = {
+    ...market,
+    fetchedAt: new Date().toISOString()
+  };
+  marketCache = { data: payload, expiresAt: Date.now() + 60000 };
 
   console.log('[MARKET]', market.source, JSON.stringify({
     priceUsd: market.priceUsd,
@@ -125,42 +137,48 @@ async function handleMarket(res) {
     fallbackReason: primaryError
   }));
 
-  json(res, 200, {
-    ...market,
-    fetchedAt: new Date().toISOString()
-  });
+  json(res, 200, payload);
 }
 
 async function handleHolders(res) {
-  // Prefer Blockscout's current v2 API. The legacy Etherscan-style endpoint
-  // can return 403 on Robinhood Chain even though the public explorer works.
-  const tokenUrl = 'https://robinhoodchain.blockscout.com/api/v2/tokens/' + CONTRACT;
-  const token = await fetchJson(tokenUrl);
+  try {
+    const tokenUrl = 'https://robinhoodchain.blockscout.com/api/v2/tokens/' + CONTRACT;
+    const token = await fetchJson(tokenUrl);
 
-  let count = Number(
-    token?.holders_count ??
-    token?.holders ??
-    token?.holder_count
-  );
+    let count = Number(
+      token?.holders_count ??
+      token?.holders ??
+      token?.holder_count
+    );
 
-  // Some Blockscout versions omit holders_count from token details.
-  // For small/new tokens, count the public holder list as a fallback.
-  if (!Number.isFinite(count)) {
-    const holdersUrl = 'https://robinhoodchain.blockscout.com/api/v2/tokens/' + CONTRACT + '/holders';
-    const holders = await fetchJson(holdersUrl);
-    if (!holders || !Array.isArray(holders.items)) {
-      throw new Error('Blockscout v2 holder data unavailable');
+    if (!Number.isFinite(count)) {
+      const holdersUrl = 'https://robinhoodchain.blockscout.com/api/v2/tokens/' + CONTRACT + '/holders';
+      const holders = await fetchJson(holdersUrl);
+      if (!holders || !Array.isArray(holders.items)) {
+        throw new Error('Blockscout v2 holder data unavailable');
+      }
+      count = holders.items.length;
     }
-    count = holders.items.length;
-  }
 
-  console.log('[HOLDERS]', count);
-  json(res, 200, {
-    source: 'Robinhood Chain Blockscout v2',
-    fetchedAt: new Date().toISOString(),
-    count,
-    capped: false
-  });
+    console.log('[HOLDERS]', count);
+    return json(res, 200, {
+      source: 'Robinhood Chain Blockscout v2',
+      fetchedAt: new Date().toISOString(),
+      live: true,
+      count,
+      capped: false
+    });
+  } catch (error) {
+    console.warn('[HOLDERS] live API unavailable:', error.message);
+    return json(res, 200, {
+      source: 'SUNV verified snapshot',
+      fetchedAt: new Date().toISOString(),
+      live: false,
+      lastVerifiedCount: 4,
+      lastVerifiedAt: '2026-09-21',
+      note: 'Blockscout currently rejects server-side API requests for this token. Use the direct Blockscout link for the current live count.'
+    });
+  }
 }
 
 const server = http.createServer(async (req, res) => {
