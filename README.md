@@ -17,7 +17,7 @@ Official static website and public metadata package for SUNV.
 - Website: https://sunvcoin.com
 - Live transparency dashboard: https://sunvcoin.com/dashboard.html
 - Public project updates / build log: https://sunvcoin.com/updates.html
-- Holder Hub utility v1.3 beta: https://sunvcoin.com/holder.html — read-only balance verification, SUNV transfer activity, received/sent totals, net flow, counterparties, activity timestamps, balance reconciliation and shareable live-check links
+- Holder Hub utility v1.4 beta: https://sunvcoin.com/holder.html — read-only balance verification, SUNV transfer activity, received/sent totals, net flow, counterparties, activity timestamps, balance reconciliation, visual flow comparison, recent activity timeline and shareable live-check links
 - Litepaper v0.1: https://sunvcoin.com/litepaper.html
 - Supply & treasury transparency: https://sunvcoin.com/transparency.html
 - Source litepaper: `metadata/litepaper.md`
