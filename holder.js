@@ -1,12 +1,15 @@
 const HOLDER_API = 'https://sunv-data-api.onrender.com';
 const TOTAL_SUPPLY = 100000000;
-const CONTRACT = '0x22fd16577ba869A7df77F4280ae08c65BB03111d';
 
 const input = document.getElementById('walletAddress');
 const verifyButton = document.getElementById('verifyButton');
 const connectButton = document.getElementById('connectButton');
 const clearButton = document.getElementById('clearButton');
+const copyLinkButton = document.getElementById('copyLinkButton');
+const shareResultButton = document.getElementById('shareResultButton');
 const message = document.getElementById('holderMessage');
+
+let currentResult = null;
 
 function validAddress(value) {
   return /^0x[a-fA-F0-9]{40}$/.test(String(value || '').trim());
@@ -27,6 +30,40 @@ function formatMoney(value) {
   return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
+function formatCheckedTime(date) {
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
+function shareUrl(address) {
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('address', address);
+  return url.toString();
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  textarea.remove();
+}
+
 function setLoading(on) {
   verifyButton.disabled = on;
   connectButton.disabled = on;
@@ -34,6 +71,7 @@ function setLoading(on) {
 }
 
 function resetResult() {
+  currentResult = null;
   document.getElementById('holderStatus').textContent = 'No wallet checked yet';
   document.getElementById('holderBadge').textContent = 'READ-ONLY';
   document.getElementById('holderBadge').classList.remove('holder-badge-positive');
@@ -41,7 +79,10 @@ function resetResult() {
   document.getElementById('estimatedValue').textContent = '—';
   document.getElementById('supplyShare').textContent = '—';
   document.getElementById('checkedAddress').textContent = '—';
+  document.getElementById('verifiedAt').textContent = '—';
   document.getElementById('explorerLink').href = 'https://robinhoodchain.blockscout.com/';
+  copyLinkButton.disabled = true;
+  shareResultButton.disabled = true;
 }
 
 async function fetchBalance(address) {
@@ -69,7 +110,7 @@ async function fetchMarketPrice() {
   }
 }
 
-async function verifyAddress(addressValue) {
+async function verifyAddress(addressValue, options = {}) {
   const address = String(addressValue || '').trim();
   if (!validAddress(address)) {
     message.textContent = 'Enter a valid EVM wallet address beginning with 0x.';
@@ -87,6 +128,18 @@ async function verifyAddress(addressValue) {
 
     const balance = Number(balanceData.balanceSunv);
     const isHolder = Number.isFinite(balance) && balance > 0;
+    const checkedAt = new Date();
+    const estimatedValue = price !== null && Number.isFinite(balance) ? balance * price : null;
+    const supplyPct = Number.isFinite(balance) ? (balance / TOTAL_SUPPLY) * 100 : null;
+
+    currentResult = {
+      address,
+      balance,
+      price,
+      estimatedValue,
+      supplyPct,
+      checkedAt
+    };
 
     document.getElementById('holderStatus').textContent =
       isHolder ? 'SUNV holdings verified onchain' : 'No SUNV detected in this wallet';
@@ -94,33 +147,35 @@ async function verifyAddress(addressValue) {
       isHolder ? 'HOLDER VERIFIED' : 'NO BALANCE';
     document.getElementById('holderBadge').classList.toggle('holder-badge-positive', isHolder);
     document.getElementById('sunvBalance').textContent = formatSunv(balance) + ' SUNV';
-
-    if (price !== null && Number.isFinite(balance)) {
-      document.getElementById('estimatedValue').textContent = formatMoney(balance * price);
-    } else {
-      document.getElementById('estimatedValue').textContent = 'Unavailable';
-    }
-
-    if (Number.isFinite(balance)) {
-      const pct = (balance / TOTAL_SUPPLY) * 100;
-      document.getElementById('supplyShare').textContent =
-        pct === 0 ? '0%' : pct.toLocaleString(undefined, { maximumFractionDigits: 8 }) + '%';
-    }
-
+    document.getElementById('estimatedValue').textContent =
+      estimatedValue === null ? 'Unavailable' : formatMoney(estimatedValue);
+    document.getElementById('supplyShare').textContent =
+      supplyPct === null ? '—' : (supplyPct === 0 ? '0%' : supplyPct.toLocaleString(undefined, { maximumFractionDigits: 8 }) + '%');
     document.getElementById('checkedAddress').textContent = address;
+    document.getElementById('verifiedAt').textContent = formatCheckedTime(checkedAt);
     document.getElementById('explorerLink').href =
       'https://robinhoodchain.blockscout.com/address/' + address;
 
-    const valueText =
-      price !== null && Number.isFinite(balance) ? ' · approx. ' + formatMoney(balance * price) : '';
+    copyLinkButton.disabled = false;
+    shareResultButton.disabled = false;
+
+    const url = shareUrl(address);
+    if (!options.skipHistory) {
+      history.replaceState(null, '', url);
+    }
+
+    const valueText = estimatedValue !== null ? ' · approx. ' + formatMoney(estimatedValue) : '';
     message.textContent =
       'Verified: ' + formatSunv(balance) + ' SUNV' + valueText + '. No signature or transaction was requested.';
 
     document.getElementById('resultCard').scrollIntoView({
-      behavior: 'smooth',
+      behavior: options.noScroll ? 'auto' : 'smooth',
       block: 'center'
     });
   } catch (error) {
+    currentResult = null;
+    copyLinkButton.disabled = true;
+    shareResultButton.disabled = true;
     message.textContent = 'Unable to verify right now: ' + (error.message || 'unknown error');
   } finally {
     setLoading(false);
@@ -152,11 +207,63 @@ connectButton.addEventListener('click', async () => {
   }
 });
 
+copyLinkButton.addEventListener('click', async () => {
+  if (!currentResult) return;
+  try {
+    await copyText(shareUrl(currentResult.address));
+    const old = copyLinkButton.textContent;
+    copyLinkButton.textContent = 'Link copied ✓';
+    setTimeout(() => { copyLinkButton.textContent = old; }, 1800);
+  } catch {
+    message.textContent = 'Could not copy automatically. Copy the page URL from your browser.';
+  }
+});
+
+shareResultButton.addEventListener('click', async () => {
+  if (!currentResult) return;
+
+  const title = 'SUNV Holder Hub — Live Wallet Check';
+  const valueText = currentResult.estimatedValue === null
+    ? ''
+    : ' · displayed value ' + formatMoney(currentResult.estimatedValue);
+  const text =
+    'Public wallet ' + currentResult.address +
+    ' held ' + formatSunv(currentResult.balance) + ' SUNV' + valueText +
+    ' when checked at ' + formatCheckedTime(currentResult.checkedAt) +
+    '. Open the link for a fresh onchain check. Wallet ownership is not asserted.';
+
+  const url = shareUrl(currentResult.address);
+
+  try {
+    if (navigator.share) {
+      await navigator.share({ title, text, url });
+    } else {
+      await copyText(text + '\n' + url);
+      const old = shareResultButton.textContent;
+      shareResultButton.textContent = 'Summary copied ✓';
+      setTimeout(() => { shareResultButton.textContent = old; }, 1800);
+    }
+  } catch (error) {
+    if (error && error.name === 'AbortError') return;
+    message.textContent = 'Sharing was unavailable. Use “Copy verification link” instead.';
+  }
+});
+
 clearButton.addEventListener('click', () => {
   input.value = '';
   resetResult();
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  history.replaceState(null, '', url.toString());
   message.textContent = 'Ready to verify a wallet on Robinhood Chain.';
   input.focus();
 });
 
 resetResult();
+
+const deepLinkAddress = new URLSearchParams(window.location.search).get('address');
+if (validAddress(deepLinkAddress)) {
+  input.value = deepLinkAddress;
+  verifyAddress(deepLinkAddress, { skipHistory: true, noScroll: true });
+}
