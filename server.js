@@ -18,7 +18,7 @@ function cors(req, res) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
@@ -27,6 +27,55 @@ function json(res, status, body) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
   res.end(JSON.stringify(body));
+}
+
+async function readJsonBody(req) {
+  return await new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 10000) {
+        reject(new Error('Request body too large'));
+        req.destroy();
+      }
+    });
+    req.on('end', () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch {
+        reject(new Error('Invalid JSON body'));
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+async function rpcCall(method, params) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch('https://rpc.mainnet.chain.robinhood.com', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'SUNV-Holder-Hub/1.0'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params
+      }),
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error('Robinhood RPC HTTP ' + response.status);
+    const payload = await response.json();
+    if (payload.error) throw new Error(payload.error.message || 'Robinhood RPC error');
+    return payload.result;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function fetchJson(url) {
@@ -181,6 +230,39 @@ async function handleHolders(res) {
   }
 }
 
+async function handleBalance(req, res) {
+  const body = await readJsonBody(req);
+  const address = String(body?.address || '').trim();
+
+  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    return json(res, 400, { error: 'Invalid EVM wallet address' });
+  }
+
+  const addressWord = address.slice(2).toLowerCase().padStart(64, '0');
+  const data = '0x70a08231' + addressWord;
+  const rawHex = await rpcCall('eth_call', [{ to: CONTRACT, data }, 'latest']);
+
+  if (typeof rawHex !== 'string' || !rawHex.startsWith('0x')) {
+    throw new Error('Unexpected balance response from Robinhood Chain');
+  }
+
+  const raw = BigInt(rawHex);
+  const whole = raw / 1000000000000000000n;
+  const fraction = raw % 1000000000000000000n;
+  const fractionText = fraction.toString().padStart(18, '0').replace(/0+$/, '');
+  const balanceSunv = fractionText ? whole.toString() + '.' + fractionText : whole.toString();
+
+  console.log('[BALANCE] read-only lookup completed');
+  return json(res, 200, {
+    source: 'Robinhood Chain public RPC',
+    fetchedAt: new Date().toISOString(),
+    address,
+    contract: CONTRACT,
+    balanceRaw: raw.toString(),
+    balanceSunv
+  });
+}
+
 const server = http.createServer(async (req, res) => {
   cors(req, res);
   console.log('[REQUEST]', req.method, req.url, req.headers.origin || 'no-origin');
@@ -198,6 +280,10 @@ const server = http.createServer(async (req, res) => {
         version: '1.1',
         time: new Date().toISOString()
       });
+    }
+
+    if (req.method === 'POST' && req.url === '/api/balance') {
+      return await handleBalance(req, res);
     }
 
     if (req.method !== 'GET') {
