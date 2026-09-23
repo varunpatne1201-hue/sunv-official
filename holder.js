@@ -111,8 +111,15 @@ async function verifyAddress(addressValue) {
     document.getElementById('explorerLink').href =
       'https://robinhoodchain.blockscout.com/address/' + address;
 
+    const valueText =
+      price !== null && Number.isFinite(balance) ? ' · approx. ' + formatMoney(balance * price) : '';
     message.textContent =
-      'Verified using SUNV balanceOf on Robinhood Chain. No signature or transaction was requested.';
+      'Verified: ' + formatSunv(balance) + ' SUNV' + valueText + '. No signature or transaction was requested.';
+
+    document.getElementById('resultCard').scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
   } catch (error) {
     message.textContent = 'Unable to verify right now: ' + (error.message || 'unknown error');
   } finally {
