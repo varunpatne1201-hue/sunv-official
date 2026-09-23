@@ -90,7 +90,21 @@ function setLoading(on) {
   verifyButton.textContent = on ? 'Checking…' : 'Verify holdings';
 }
 
+function resetVisuals() {
+  document.getElementById('visualNetFlow').textContent = '—';
+  document.getElementById('flowReceivedValue').textContent = '—';
+  document.getElementById('flowSentValue').textContent = '—';
+  document.getElementById('flowReceivedBar').style.width = '0%';
+  document.getElementById('flowSentBar').style.width = '0%';
+  document.getElementById('visualFlowNote').textContent =
+    'Verify a wallet to visualize transfer flow.';
+  document.getElementById('timelineEventCount').textContent = '—';
+  document.getElementById('activityTimeline').innerHTML =
+    '<div class="timeline-empty">Verify a wallet to visualize recent SUNV transfers.</div>';
+}
+
 function resetAnalytics() {
+  resetVisuals();
   document.getElementById('analyticsReceived').textContent = '—';
   document.getElementById('analyticsSent').textContent = '—';
   document.getElementById('analyticsNet').textContent = '—';
@@ -205,6 +219,83 @@ function renderAnalytics(payload) {
   if (currentResult) currentResult.analytics = analytics;
 }
 
+function renderVisuals(payload) {
+  const analytics = payload?.analytics || {};
+  const transfers = Array.isArray(payload?.transfers) ? payload.transfers : [];
+  const received = Number(analytics.totalReceivedSunv);
+  const sent = Number(analytics.totalSentSunv);
+  const net = Number(analytics.netFlowSunv);
+
+  const maxFlow = Math.max(
+    Number.isFinite(received) ? Math.abs(received) : 0,
+    Number.isFinite(sent) ? Math.abs(sent) : 0,
+    1
+  );
+
+  const receivedPct = Number.isFinite(received) ? Math.max(1.5, Math.min(100, (Math.abs(received) / maxFlow) * 100)) : 0;
+  const sentPct = Number.isFinite(sent) ? Math.max(1.5, Math.min(100, (Math.abs(sent) / maxFlow) * 100)) : 0;
+
+  document.getElementById('flowReceivedBar').style.width = receivedPct + '%';
+  document.getElementById('flowSentBar').style.width = sentPct + '%';
+  document.getElementById('flowReceivedValue').textContent =
+    Number.isFinite(received) ? formatSunv(received) + ' SUNV' : '—';
+  document.getElementById('flowSentValue').textContent =
+    Number.isFinite(sent) ? formatSunv(sent) + ' SUNV' : '—';
+  document.getElementById('visualNetFlow').textContent =
+    Number.isFinite(net) ? formatSignedSunv(net) : '—';
+
+  if (Number.isFinite(received) && Number.isFinite(sent)) {
+    const gross = received + sent;
+    const receivedShare = gross > 0 ? (received / gross) * 100 : 0;
+    document.getElementById('visualFlowNote').textContent =
+      'Observed flow mix: ' + receivedShare.toFixed(1) + '% received · ' +
+      (100 - receivedShare).toFixed(1) + '% sent.';
+  } else {
+    document.getElementById('visualFlowNote').textContent =
+      'Transfer totals are unavailable for this wallet.';
+  }
+
+  const timeline = document.getElementById('activityTimeline');
+  const usable = transfers
+    .filter((t) => Number.isFinite(Number(t.amountSunv)))
+    .slice()
+    .reverse();
+
+  document.getElementById('timelineEventCount').textContent =
+    usable.length ? usable.length.toLocaleString() + ' events' : '0 events';
+
+  if (!usable.length) {
+    timeline.innerHTML = '<div class="timeline-empty">No recent SUNV transfers available to visualize.</div>';
+    return;
+  }
+
+  const maxAmount = Math.max(...usable.map((t) => Math.abs(Number(t.amountSunv))), 1);
+  const firstTime = usable.find((t) => t.timestamp)?.timestamp || null;
+  const lastTime = [...usable].reverse().find((t) => t.timestamp)?.timestamp || null;
+
+  timeline.innerHTML =
+    '<div class="timeline-bars">' +
+      usable.map((transfer, index) => {
+        const amount = Math.abs(Number(transfer.amountSunv));
+        const height = Math.max(12, Math.min(100, (amount / maxAmount) * 100));
+        const incoming = transfer.direction === 'IN';
+        const outgoing = transfer.direction === 'OUT';
+        const cls = incoming ? 'timeline-bar-in' : outgoing ? 'timeline-bar-out' : 'timeline-bar-self';
+        const title = (incoming ? 'Received ' : outgoing ? 'Sent ' : 'Self transfer ') +
+          formatSunv(amount) + ' SUNV' +
+          (transfer.timestamp ? ' · ' + formatActivityTime(transfer.timestamp) : '');
+        return '<div class="timeline-bar-wrap" title="' + title.replace(/"/g, '&quot;') + '">' +
+          '<div class="timeline-bar ' + cls + '" style="height:' + height.toFixed(2) + '%"></div>' +
+          '<span>' + (index + 1) + '</span>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    '<div class="timeline-axis">' +
+      '<span>' + (firstTime ? formatActivityTime(firstTime) : 'Earlier') + '</span>' +
+      '<span>' + (lastTime ? formatActivityTime(lastTime) : 'Latest') + '</span>' +
+    '</div>';
+}
+
 function renderActivity(payload) {
   const transfers = Array.isArray(payload?.transfers) ? payload.transfers : [];
   const analytics = payload?.analytics || {};
@@ -225,6 +316,7 @@ function renderActivity(payload) {
       : 'No SUNV transfer events were found for this wallet in the scanned history.';
 
   renderAnalytics(payload);
+  renderVisuals(payload);
 
   const list = document.getElementById('transferList');
   if (!transfers.length) {
