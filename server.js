@@ -249,13 +249,27 @@ function sunvFromHex(hex) {
   return fractionText ? whole.toString() + '.' + fractionText : whole.toString();
 }
 
-async function getTransferLogsInRange(fromBlock, toBlock) {
-  return await rpcCall('eth_getLogs', [{
+async function getWalletTransferLogsInRange(address, fromBlock, toBlock) {
+  const addressTopic = topicAddress(address);
+  const base = {
     fromBlock: '0x' + fromBlock.toString(16),
     toBlock: '0x' + toBlock.toString(16),
-    address: CONTRACT,
-    topics: [TRANSFER_TOPIC]
-  }]);
+    address: CONTRACT
+  };
+
+  const [outgoing, incoming] = await Promise.all([
+    rpcCall('eth_getLogs', [{ ...base, topics: [TRANSFER_TOPIC, addressTopic] }]),
+    rpcCall('eth_getLogs', [{ ...base, topics: [TRANSFER_TOPIC, null, addressTopic] }])
+  ]);
+
+  const combined = [...(Array.isArray(outgoing) ? outgoing : []), ...(Array.isArray(incoming) ? incoming : [])];
+  const seen = new Set();
+  return combined.filter((log) => {
+    const key = String(log.transactionHash || '') + ':' + String(log.logIndex || '');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 async function recentTransferLogsForAddress(address) {
@@ -263,24 +277,25 @@ async function recentTransferLogsForAddress(address) {
   const latest = parseInt(latestHex, 16);
   if (!Number.isFinite(latest)) throw new Error('Unable to read latest Robinhood Chain block');
 
-  const wanted = address.toLowerCase();
-  const maxScan = 500000;
+  // Robinhood Chain can advance quickly, so scan a much wider window than v1.2 initially did.
+  // Topic-filtering by wallet keeps the RPC requests narrow.
+  const maxScan = 5000000;
   const earliest = Math.max(0, latest - maxScan);
   const matched = [];
   let end = latest;
   let successfulRanges = 0;
 
   while (end >= earliest && matched.length < 20) {
-    let chunkSize = 50000;
+    let chunkSize = 100000;
     let logs = null;
     let start = Math.max(earliest, end - chunkSize + 1);
 
     while (chunkSize >= 2500 && logs === null) {
       start = Math.max(earliest, end - chunkSize + 1);
       try {
-        logs = await getTransferLogsInRange(start, end);
+        logs = await getWalletTransferLogsInRange(address, start, end);
       } catch (error) {
-        console.warn('[ACTIVITY] log range failed', start, end, error.message);
+        console.warn('[ACTIVITY] wallet-filtered log range failed', start, end, error.message);
         chunkSize = Math.floor(chunkSize / 2);
       }
     }
@@ -291,16 +306,7 @@ async function recentTransferLogsForAddress(address) {
     }
 
     successfulRanges += 1;
-    if (Array.isArray(logs)) {
-      for (const log of logs) {
-        const from = addressFromTopic(log?.topics?.[1]);
-        const to = addressFromTopic(log?.topics?.[2]);
-        if (from?.toLowerCase() === wanted || to?.toLowerCase() === wanted) {
-          matched.push(log);
-        }
-      }
-    }
-
+    matched.push(...logs);
     end = start - 1;
   }
 
@@ -380,7 +386,7 @@ async function handleActivity(req, res) {
     source: 'Robinhood Chain public RPC',
     fetchedAt: new Date().toISOString(),
     address,
-    scanWindowBlocks: 500000,
+    scanWindowBlocks: 5000000,
     scannedFromBlock: scan.earliestBlock,
     scannedToBlock: scan.latestBlock,
     transfers
