@@ -12,6 +12,7 @@ const $field = (name) => document.querySelectorAll(`[data-field="${name}"]`);
 const setField = (name, value) => $field(name).forEach((el) => { el.textContent = value; });
 
 function money(value, maxDecimals = 2) {
+  if (value === null || value === undefined || value === '') return '—';
   const number = Number(value);
   if (!Number.isFinite(number)) return '—';
   if (Math.abs(number) < 0.01 && number !== 0) {
@@ -24,6 +25,7 @@ function money(value, maxDecimals = 2) {
 }
 
 function compactMoney(value) {
+  if (value === null || value === undefined || value === '') return '—';
   const number = Number(value);
   if (!Number.isFinite(number)) return '—';
   return '$' + Intl.NumberFormat(undefined, {
@@ -33,6 +35,7 @@ function compactMoney(value) {
 }
 
 function percent(value) {
+  if (value === null || value === undefined || value === '') return '—';
   const number = Number(value);
   if (!Number.isFinite(number)) return '—';
   return `${number >= 0 ? '+' : ''}${number.toFixed(2)}%`;
@@ -72,8 +75,8 @@ async function loadMarket() {
   setField('fdv', compactMoney(pair.fdv));
   setField('marketCap', pair.marketCap == null ? 'Not verified' : compactMoney(pair.marketCap));
 
-  const buys = Number(pair.buys24) || 0;
-  const sells = Number(pair.sells24) || 0;
+  const buys = pair.buys24 == null ? 0 : Number(pair.buys24) || 0;
+  const sells = pair.sells24 == null ? 0 : Number(pair.sells24) || 0;
   const total = buys + sells;
   setField('buys24', buys.toLocaleString());
   setField('sells24', sells.toLocaleString());
