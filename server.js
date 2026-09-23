@@ -423,7 +423,6 @@ async function handleActivity(req, res) {
     return {
       direction,
       amountSunv: sunvFromHex(log.data),
-      amountRaw: BigInt(log.data || '0x0'),
       from,
       to,
       counterparty,
@@ -441,9 +440,11 @@ async function handleActivity(req, res) {
   let sentRaw = 0n;
   const counterparties = new Set();
 
-  for (const transfer of allTransfers) {
-    if (transfer.direction === 'IN') receivedRaw += transfer.amountRaw;
-    if (transfer.direction === 'OUT') sentRaw += transfer.amountRaw;
+  for (let i = 0; i < allTransfers.length; i += 1) {
+    const transfer = allTransfers[i];
+    const rawAmount = BigInt(allLogs[i]?.data || '0x0');
+    if (transfer.direction === 'IN') receivedRaw += rawAmount;
+    if (transfer.direction === 'OUT') sentRaw += rawAmount;
     if (transfer.counterparty && transfer.direction !== 'SELF') {
       counterparties.add(transfer.counterparty.toLowerCase());
     }
