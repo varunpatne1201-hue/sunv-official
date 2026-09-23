@@ -17,6 +17,7 @@ Official static website and public metadata package for SUNV.
 - Website: https://sunvcoin.com
 - Live transparency dashboard: https://sunvcoin.com/dashboard.html
 - Public project updates / build log: https://sunvcoin.com/updates.html
+- Holder Hub utility beta: https://sunvcoin.com/holder.html
 - Litepaper v0.1: https://sunvcoin.com/litepaper.html
 - Supply & treasury transparency: https://sunvcoin.com/transparency.html
 - Source litepaper: `metadata/litepaper.md`
@@ -34,7 +35,7 @@ The website distinguishes implemented onchain facts from planned or exploratory 
 2. Complete public metadata and explorer reviews.
 3. Publish reserve, liquidity and treasury disclosures.
 4. Maintain and expand the live SUNV transparency dashboard.
-5. Prototype practical SUN ecosystem utility.
+5. Test and expand the live SUNV Holder Hub utility beta.
 6. Evaluate stronger custody, reserve controls and decentralization mechanisms as the project matures.
 
 ## Deployment
