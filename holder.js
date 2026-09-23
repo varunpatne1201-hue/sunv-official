@@ -70,8 +70,18 @@ function setLoading(on) {
   verifyButton.textContent = on ? 'Checking…' : 'Verify holdings';
 }
 
+function resetActivity() {
+  document.getElementById('receivedCount').textContent = '—';
+  document.getElementById('sentCount').textContent = '—';
+  document.getElementById('activityStatus').textContent = 'Not checked';
+  document.getElementById('activityScanNote').textContent = 'Verify a wallet to load recent activity.';
+  document.getElementById('transferList').innerHTML =
+    '<div class="transfer-empty">Verify a wallet to load recent SUNV transfer activity.</div>';
+}
+
 function resetResult() {
   currentResult = null;
+  resetActivity();
   document.getElementById('holderStatus').textContent = 'No wallet checked yet';
   document.getElementById('holderBadge').textContent = 'READ-ONLY';
   document.getElementById('holderBadge').classList.remove('holder-badge-positive');
@@ -96,6 +106,84 @@ async function fetchBalance(address) {
     throw new Error(payload.detail || payload.error || 'Balance lookup failed');
   }
   return payload;
+}
+
+async function fetchActivity(address) {
+  const response = await fetch(HOLDER_API + '/api/activity', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ address })
+  });
+  const payload = await response.json();
+  if (!response.ok || payload.error) {
+    throw new Error(payload.detail || payload.error || 'Activity lookup failed');
+  }
+  return payload;
+}
+
+function shortAddress(address) {
+  if (!address) return 'Unknown';
+  if (/^0x0{40}$/i.test(address)) return 'Mint / zero address';
+  return address.slice(0, 6) + '…' + address.slice(-4);
+}
+
+function renderActivity(payload) {
+  const transfers = Array.isArray(payload?.transfers) ? payload.transfers : [];
+  const incoming = transfers.filter((t) => t.direction === 'IN').length;
+  const outgoing = transfers.filter((t) => t.direction === 'OUT').length;
+
+  document.getElementById('receivedCount').textContent = incoming.toLocaleString();
+  document.getElementById('sentCount').textContent = outgoing.toLocaleString();
+  document.getElementById('activityStatus').textContent = transfers.length ? 'Loaded' : 'No recent transfers';
+  document.getElementById('activityScanNote').textContent =
+    transfers.length
+      ? 'Showing up to 20 recent SUNV transfer events found in the current RPC scan window.'
+      : 'No SUNV transfer events were found for this wallet in the current RPC scan window.';
+
+  const list = document.getElementById('transferList');
+  if (!transfers.length) {
+    list.innerHTML = '<div class="transfer-empty">No recent SUNV transfers found in the current scan window.</div>';
+    return;
+  }
+
+  list.innerHTML = transfers.map((transfer) => {
+    const zeroFrom = /^0x0{40}$/i.test(transfer.from || '');
+    const zeroTo = /^0x0{40}$/i.test(transfer.to || '');
+    let label = transfer.direction === 'IN' ? 'RECEIVED' : transfer.direction === 'OUT' ? 'SENT' : 'SELF';
+    if (zeroFrom && transfer.direction === 'IN') label = 'MINT';
+    if (zeroTo && transfer.direction === 'OUT') label = 'BURN';
+
+    const amount = formatSunv(transfer.amountSunv);
+    const when = transfer.timestamp ? new Date(transfer.timestamp).toLocaleString() : 'Timestamp unavailable';
+    const counterparty = shortAddress(transfer.counterparty);
+    const txUrl = 'https://robinhoodchain.blockscout.com/tx/' + transfer.txHash;
+
+    return '<article class="transfer-row">' +
+      '<div class="transfer-direction transfer-' + label.toLowerCase() + '">' + label + '</div>' +
+      '<div class="transfer-main"><strong>' + amount + ' SUNV</strong><span>' +
+      ((label === 'RECEIVED' || label === 'MINT') ? 'From' : (label === 'SENT' || label === 'BURN') ? 'To' : 'Wallet') +
+      ': ' + counterparty + '</span></div>' +
+      '<div class="transfer-meta"><span>' + when + '</span><a href="' + txUrl + '" target="_blank" rel="noopener noreferrer">Verify tx ↗</a></div>' +
+      '</article>';
+  }).join('');
+}
+
+async function loadActivity(address) {
+  document.getElementById('activityStatus').textContent = 'Loading…';
+  document.getElementById('activityScanNote').textContent = 'Reading SUNV Transfer events from Robinhood Chain.';
+  document.getElementById('transferList').innerHTML = '<div class="transfer-empty">Loading recent transfer activity…</div>';
+
+  try {
+    const payload = await fetchActivity(address);
+    renderActivity(payload);
+  } catch (error) {
+    document.getElementById('receivedCount').textContent = '—';
+    document.getElementById('sentCount').textContent = '—';
+    document.getElementById('activityStatus').textContent = 'Unavailable';
+    document.getElementById('activityScanNote').textContent = 'Recent transfer activity could not be loaded right now.';
+    document.getElementById('transferList').innerHTML =
+      '<div class="transfer-empty">Activity feed temporarily unavailable. Use Blockscout from the wallet result to verify transactions.</div>';
+  }
 }
 
 async function fetchMarketPrice() {
@@ -167,6 +255,8 @@ async function verifyAddress(addressValue, options = {}) {
     const valueText = estimatedValue !== null ? ' · approx. ' + formatMoney(estimatedValue) : '';
     message.textContent =
       'Verified: ' + formatSunv(balance) + ' SUNV' + valueText + '. No signature or transaction was requested.';
+
+    loadActivity(address);
 
     document.getElementById('resultCard').scrollIntoView({
       behavior: options.noScroll ? 'auto' : 'smooth',
