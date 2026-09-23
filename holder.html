@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SUNV Holder Hub v1.1 Beta — Verify & Share SUNV Holdings</title>
+  <title>SUNV Holder Hub v1.2 Beta — Holdings & Wallet Activity</title>
   <meta name="description" content="Read-only SUNV holder utility: verify a wallet's SUNV balance on Robinhood Chain, estimate current market value and view its share of fixed supply." />
   <meta name="theme-color" content="#080704" />
-  <meta property="og:title" content="SUNV Holder Hub v1.1 Beta" />
+  <meta property="og:title" content="SUNV Holder Hub v1.2 Beta" />
   <meta property="og:description" content="A read-only onchain utility for verifying SUNV holdings on Robinhood Chain." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://sunvcoin.com/holder.html" />
@@ -29,6 +29,7 @@
     <nav class="nav" aria-label="Holder Hub navigation">
       <a href="#verify">Verify</a>
       <a href="#results">Results</a>
+      <a href="#activity">Activity</a>
       <a href="#safety">Safety</a>
       <a href="/dashboard.html">Dashboard</a>
       <a href="/updates.html">Updates</a>
@@ -39,9 +40,9 @@
   <main>
     <section class="section holder-hero" id="verify">
       <div>
-        <div class="eyebrow"><span class="status-dot"></span> Utility · v1.1 Beta</div>
+        <div class="eyebrow"><span class="status-dot"></span> Utility · v1.2 Beta</div>
         <h1>Your SUNV, <span>verified onchain.</span></h1>
-        <p class="hero-lead">Enter any public EVM wallet address or connect a browser wallet. Holder Hub reads the SUNV ERC-20 balance from Robinhood Chain, combines it with live market data, and creates a shareable live-check link. It does not request a signature, approval or transaction.</p>
+        <p class="hero-lead">Enter any public EVM wallet address or connect a browser wallet. Holder Hub reads the SUNV ERC-20 balance from Robinhood Chain, shows recent SUNV transfer activity, combines the balance with live market data, and creates a shareable live-check link. It does not request a signature, approval or transaction.</p>
       </div>
 
       <div class="holder-lookup">
@@ -119,6 +120,39 @@
       <p class="risk-note"><strong>Market-value limitation:</strong> the estimated value is a simple price × balance calculation. SUNV currently has shallow liquidity, so it does not represent a guaranteed sale value or the amount that could be converted without price impact.</p>
     </section>
 
+    <section class="section holder-activity-section" id="activity">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">Wallet activity</div>
+          <h2>Recent SUNV transfers.</h2>
+        </div>
+        <p>Holder Hub reads recent ERC-20 Transfer events from Robinhood Chain and shows whether SUNV moved into or out of the checked wallet. Activity is read-only and links back to Blockscout for transaction verification.</p>
+      </div>
+
+      <div class="activity-summary-grid">
+        <article class="metric-card">
+          <span class="metric-label">Recent received</span>
+          <strong class="metric-value" id="receivedCount">—</strong>
+          <small>Incoming SUNV transfers found</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Recent sent</span>
+          <strong class="metric-value" id="sentCount">—</strong>
+          <small>Outgoing SUNV transfers found</small>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Activity status</span>
+          <strong class="metric-value metric-value-small" id="activityStatus">Not checked</strong>
+          <small id="activityScanNote">Verify a wallet to load recent activity.</small>
+        </article>
+      </div>
+
+      <div class="transfer-list" id="transferList">
+        <div class="transfer-empty">Verify a wallet to load recent SUNV transfer activity.</div>
+      </div>
+      <p class="risk-note"><strong>Activity note:</strong> Holder Hub shows recent onchain transfer events within its current scan window. It is not an accounting statement and may not represent a wallet's complete lifetime history.</p>
+    </section>
+
     <section class="section holder-tools" id="safety">
       <div class="section-heading">
         <div>
@@ -153,11 +187,11 @@
 
   <footer>
     <div class="footer-brand"><img src="assets/sunv-icon.png" alt="" /><span>SUNV</span></div>
-    <p>SUNV Holder Hub v1.1 Beta · Read-only wallet verification utility with shareable live-check links.</p>
+    <p>SUNV Holder Hub v1.2 Beta · Read-only wallet verification utility with shareable live-check links.</p>
     <p class="footer-small">Robinhood Chain mainnet · Chain ID 4663 · Canonical contract: 0x22fd16577ba869A7df77F4280ae08c65BB03111d</p>
     <p class="footer-small">SUNV is independent and is not endorsed by Robinhood Markets, Inc. Digital assets are volatile and can lose value.</p>
   </footer>
 
-  <script src="holder.js?v=20260922-2"></script>
+  <script src="holder.js?v=20260922-3"></script>
 </body>
 </html>
