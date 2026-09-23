@@ -666,3 +666,34 @@ footer { width:min(1180px,calc(100% - 36px));margin:0 auto;padding:0 0 50px;colo
   .transfer-row { grid-template-columns:1fr; gap:10px; }
   .transfer-meta { text-align:left; }
 }
+
+/* Holder Hub v1.3 wallet analytics */
+.holder-analytics-section { padding-top:60px; padding-bottom:60px; }
+.analytics-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.analytics-time-card { grid-column:span 1; }
+.metric-value-time {
+  font-size:clamp(1.05rem,2vw,1.45rem);
+  line-height:1.25;
+  letter-spacing:-.02em;
+}
+.analytics-coverage-card {
+  margin-top:16px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:linear-gradient(120deg,rgba(255,184,35,.045),rgba(255,255,255,.018));
+}
+.analytics-coverage-card p {
+  margin:0;
+  color:var(--muted);
+}
+@media (max-width: 960px) {
+  .analytics-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width: 640px) {
+  .analytics-grid { grid-template-columns:1fr; }
+}
