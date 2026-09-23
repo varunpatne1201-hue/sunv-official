@@ -265,34 +265,60 @@ async function recentTransferLogsForAddress(address) {
 
   const wanted = address.toLowerCase();
   const maxScan = 500000;
-  const chunkSize = 50000;
   const earliest = Math.max(0, latest - maxScan);
   const matched = [];
+  let end = latest;
+  let successfulRanges = 0;
 
-  for (let end = latest; end >= earliest && matched.length < 20; end -= chunkSize) {
-    const start = Math.max(earliest, end - chunkSize + 1);
-    let logs;
-    try {
-      logs = await getTransferLogsInRange(start, end);
-    } catch (error) {
-      console.warn('[ACTIVITY] log range failed', start, end, error.message);
+  while (end >= earliest && matched.length < 20) {
+    let chunkSize = 50000;
+    let logs = null;
+    let start = Math.max(earliest, end - chunkSize + 1);
+
+    while (chunkSize >= 2500 && logs === null) {
+      start = Math.max(earliest, end - chunkSize + 1);
+      try {
+        logs = await getTransferLogsInRange(start, end);
+      } catch (error) {
+        console.warn('[ACTIVITY] log range failed', start, end, error.message);
+        chunkSize = Math.floor(chunkSize / 2);
+      }
+    }
+
+    if (logs === null) {
+      end = start - 1;
       continue;
     }
 
-    if (!Array.isArray(logs)) continue;
-
-    for (const log of logs) {
-      const from = addressFromTopic(log?.topics?.[1]);
-      const to = addressFromTopic(log?.topics?.[2]);
-      if (from?.toLowerCase() === wanted || to?.toLowerCase() === wanted) {
-        matched.push(log);
+    successfulRanges += 1;
+    if (Array.isArray(logs)) {
+      for (const log of logs) {
+        const from = addressFromTopic(log?.topics?.[1]);
+        const to = addressFromTopic(log?.topics?.[2]);
+        if (from?.toLowerCase() === wanted || to?.toLowerCase() === wanted) {
+          matched.push(log);
+        }
       }
     }
+
+    end = start - 1;
   }
 
-  return matched
-    .sort((a, b) => parseInt(b.blockNumber, 16) - parseInt(a.blockNumber, 16))
-    .slice(0, 20);
+  if (successfulRanges === 0) {
+    throw new Error('Robinhood Chain log provider did not return a readable transfer range');
+  }
+
+  return {
+    latestBlock: latest,
+    earliestBlock: Math.max(earliest, end + 1),
+    logs: matched
+      .sort((a, b) => {
+        const blockDiff = parseInt(b.blockNumber, 16) - parseInt(a.blockNumber, 16);
+        if (blockDiff !== 0) return blockDiff;
+        return parseInt(b.logIndex || '0x0', 16) - parseInt(a.logIndex || '0x0', 16);
+      })
+      .slice(0, 20)
+  };
 }
 
 async function handleActivity(req, res) {
@@ -303,7 +329,8 @@ async function handleActivity(req, res) {
     return json(res, 400, { error: 'Invalid EVM wallet address' });
   }
 
-  const logs = await recentTransferLogsForAddress(address);
+  const scan = await recentTransferLogsForAddress(address);
+  const logs = scan.logs;
   const uniqueBlocks = [...new Set(logs.map((log) => log.blockNumber))];
   const blockPairs = await Promise.all(uniqueBlocks.map(async (blockNumber) => {
     try {
@@ -354,6 +381,8 @@ async function handleActivity(req, res) {
     fetchedAt: new Date().toISOString(),
     address,
     scanWindowBlocks: 500000,
+    scannedFromBlock: scan.earliestBlock,
+    scannedToBlock: scan.latestBlock,
     transfers
   });
 }
